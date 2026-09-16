@@ -130,6 +130,53 @@ def test_gname_length_is_checked():
                                ref=_reference(["A"], [[1.0, 0.0]]))
 
 
+def test_float32_input_gives_the_same_answer_as_float64():
+    """A float32 matrix must not degrade the projection.
+
+    scverse objects commonly store expression as float32. Summing such a matrix
+    in float32 to get the per-gene means loses enough of the mean to move the
+    projected angle by 1e-5 radians on tens of thousands of cells, which is
+    worse than the tolerance this package claims against R. The means are
+    therefore accumulated in float64 whatever the input dtype.
+
+    The fixture is built in float32 and widened to float64, not the other way
+    round. Narrowing an arbitrary float64 matrix loses data, and the resulting
+    difference would be the input's, not the accumulation's. Starting in
+    float32 makes the two matrices carry identical values, so anything that
+    differs is the arithmetic.
+    """
+    values = (RNG.random((4000, 4), dtype=np.float32) * 4.0).astype(np.float32)
+    values[values < 2.0] = np.float32(0.0)
+    adata = ad.AnnData(X=values.astype(np.float64),
+                       var=pd.DataFrame(index=["GA", "GB", "GC", "GD"]))
+    assert np.array_equal(adata.X.astype(np.float32).astype(np.float64), adata.X)
+    ref = _reference(["GA", "GB", "GC"], RNG.normal(size=(3, 2)))
+
+    def project(matrix):
+        out = ad.AnnData(X=matrix, var=adata.var.copy())
+        tp.project_cycle_space(out, ref=ref, key_added="e")
+        return np.asarray(out.obsm["e"])
+
+    wide = project(sp.csr_matrix(adata.X.astype(np.float64)))
+    narrow = project(sp.csr_matrix(adata.X.astype(np.float32)))
+    assert np.allclose(wide, narrow, atol=1e-12, rtol=0)
+    assert np.allclose(wide, project(adata.X.astype(np.float32)),
+                       atol=1e-12, rtol=0)
+
+
+def test_column_means_are_accumulated_in_float64():
+    """Pin the accumulation dtype, not only its effect."""
+    from tricyclepy.projection import _column_means
+
+    value = np.float32(0.1)
+    x = sp.csr_matrix(np.full((50_000, 2), value, dtype=np.float32))
+    means = _column_means(x, np.array([0, 1]))
+    assert means.dtype == np.float64
+    # The mean of 50,000 copies of one value is that value. Accumulating in
+    # float32 drifts away from it; accumulating in float64 returns it exactly.
+    assert means[0] == float(value)
+
+
 # --- the angle -------------------------------------------------------------
 
 

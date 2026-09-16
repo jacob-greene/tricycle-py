@@ -90,10 +90,21 @@ def _match_genes(
 
 
 def _column_means(mat, cols: np.ndarray) -> np.ndarray:
-    """Mean of each selected column, over all cells. Never densifies the input."""
+    """Mean of each selected column, over all cells. Never densifies the input.
+
+    The sum is accumulated in float64 whatever the input dtype. This is not a
+    detail: summing a float32 matrix in float32 over tens of thousands of cells
+    loses enough of the mean to move the projected angle by 1e-5 radians, nine
+    orders of magnitude worse than the float64 path, even when the stored
+    values are themselves exactly representable in float32. Only the selected
+    genes are promoted, so the cost is a few hundred columns rather than the
+    whole matrix.
+    """
     n_cells = mat.shape[0]
     if sp.issparse(mat):
         sub = mat[:, cols]
+        if sub.dtype != np.float64:
+            sub = sub.astype(np.float64)
         total = np.asarray(sub.sum(axis=0), dtype=np.float64).ravel()
         return total / n_cells
     return np.asarray(mat[:, cols], dtype=np.float64).mean(axis=0)
