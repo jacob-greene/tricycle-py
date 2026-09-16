@@ -1,0 +1,10 @@
+side	target	replicates	cells	seconds	peak_rss_kb
+R	load	1	8627	0	4139660
+R	position	1	8627	2.413	4279160
+R	schwabe	1	8627	2.440	4592540
+R	loess_direct	1	8627	8.288	4286504
+R	loess_interpolate	1	8627	0.757	4285904
+Python	load	1	8627	0	357092
+Python	position	1	8627	0.466	597544
+Python	schwabe	1	8627	0.636	485840
+Python	loess_direct	1	8627	5.974	1631592

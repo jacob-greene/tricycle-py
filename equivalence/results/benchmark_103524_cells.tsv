@@ -1,0 +1,7 @@
+side	target	replicates	cells	seconds	peak_rss_kb
+R	load	12	103524	0	11767384
+R	position	12	103524	12.544	11884188
+R	schwabe	12	103524	18.669	12096376
+Python	load	12	103524	0	3189156
+Python	position	12	103524	7.744	3962744
+Python	schwabe	12	103524	5.447	4475600
