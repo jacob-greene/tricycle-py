@@ -13,7 +13,7 @@ The comparison is void unless both sides ran on the same cells, the same genes a
 | cells | 8627 | 8627 | identical barcodes, same order |
 | projection genes | 461 | 461 | identical names, same order |
 | max abs difference in per-gene mean | - | 0.000e+00 | pass |
-| max abs difference in rotation weight | - | 4.718e-16 | differs |
+| max abs difference in rotation weight | - | 0.000e+00 | pass |
 
 ## 2. Cell cycle position
 
@@ -22,14 +22,14 @@ The comparison is void unless both sides ran on the same cells, the same genes a
 | Statistic | Value | Bound | Verdict |
 |---|---|---|---|
 | median circular difference (rad) | 0.000e+00 | 1e-09 | pass |
-| maximum circular difference (rad) | 4.796e-14 | 1e-06 | pass |
-| maximum arc error (rad x radius) | 1.202e-14 | 1e-09 | pass |
+| maximum circular difference (rad) | 8.882e-16 | 1e-06 | pass |
+| maximum arc error (rad x radius) | 1.148e-14 | 1e-09 | pass |
 
 | Quantity | mean | median | p90 | p99 | max |
 |---|---|---|---|---|---|
-| circular difference (rad) | 4.652e-16 | 0.000e+00 | 8.882e-16 | 3.553e-15 | 4.796e-14 |
-| embedding coordinate difference | 1.796e-15 | 1.610e-15 | 3.553e-15 | 6.990e-15 | 1.421e-14 |
-| arc error | 1.198e-15 | 0.000e+00 | 3.422e-15 | 7.291e-15 | 1.202e-14 |
+| circular difference (rad) | 1.318e-17 | 0.000e+00 | 0.000e+00 | 4.441e-16 | 8.882e-16 |
+| embedding coordinate difference | 0.000e+00 | 0.000e+00 | 0.000e+00 | 0.000e+00 | 0.000e+00 |
+| arc error | 1.102e-16 | 0.000e+00 | 0.000e+00 | 4.926e-15 | 1.148e-14 |
 
 ### The cells that agree least
 
@@ -39,32 +39,32 @@ Cells are named by row index. A barcode can carry a dataset identifier, so `--an
 
 | rank | row | circular difference (rad) | projected radius | arc error |
 |---|---|---|---|---|
-| 1 | 6033 | 4.796e-14 | 1.078e-01 | 5.171e-15 |
-| 2 | 3386 | 2.753e-14 | 1.587e-01 | 4.371e-15 |
-| 3 | 1572 | 1.821e-14 | 1.337e-01 | 2.434e-15 |
-| 4 | 1813 | 1.776e-14 | 1.634e-01 | 2.902e-15 |
-| 5 | 6091 | 1.377e-14 | 1.935e-01 | 2.663e-15 |
-| 6 | 3280 | 1.332e-14 | 2.302e-01 | 3.067e-15 |
-| 7 | 6236 | 1.243e-14 | 2.587e-01 | 3.216e-15 |
-| 8 | 8346 | 1.243e-14 | 2.890e-01 | 3.593e-15 |
-| 9 | 4709 | 1.243e-14 | 1.375e-01 | 1.710e-15 |
-| 10 | 1445 | 1.066e-14 | 2.223e-01 | 2.369e-15 |
+| 1 | 8212 | 8.882e-16 | 1.131e+00 | 1.004e-15 |
+| 2 | 8268 | 8.882e-16 | 2.694e+00 | 2.393e-15 |
+| 3 | 8111 | 8.882e-16 | 2.463e+00 | 2.188e-15 |
+| 4 | 7016 | 8.882e-16 | 4.409e+00 | 3.916e-15 |
+| 5 | 7293 | 8.882e-16 | 2.488e+00 | 2.210e-15 |
+| 6 | 7285 | 8.882e-16 | 1.262e+00 | 1.121e-15 |
+| 7 | 7668 | 8.882e-16 | 3.876e+00 | 3.442e-15 |
+| 8 | 7712 | 8.882e-16 | 3.045e+00 | 2.705e-15 |
+| 9 | 5128 | 8.882e-16 | 2.472e+00 | 2.196e-15 |
+| 10 | 5594 | 8.882e-16 | 3.828e+00 | 3.400e-15 |
 
-The worst cell sits at projected radius 1.078e-01, against a median radius of 3.127e+00. Across all cells the log of the circular difference correlates with the log of the radius at r = -0.271. A negative correlation is the expected signature of `atan2` conditioning: the closer a cell is to the embedding centre, the more a floating-point-sized positional difference moves its angle. 87 cells sit in the smallest one percent of radii.
+The worst cell sits at projected radius 3.692e+00, against a median radius of 3.127e+00. Across all cells the log of the circular difference correlates with the log of the radius at r = 0.153. A negative correlation is the expected signature of `atan2` conditioning: the closer a cell is to the embedding centre, the more a floating-point-sized positional difference moves its angle. 87 cells sit in the smallest one percent of radii.
 
 ## 3. Other functions
 
 | Function | Result |
 |---|---|
 | estimate_schwabe_stage | 8627/8627 cells identical, 0 differ |
-| fit_periodic_loess vs R surface="direct" | max abs difference 4.219e-14 |
+| fit_periodic_loess vs R surface="direct" | max abs difference 7.994e-15 |
 | fit_periodic_loess vs R default surface="interpolate" | max abs difference 8.223e-01 |
-| loess prediction curve vs R surface="direct" | max abs difference 1.155e-14 |
+| loess prediction curve vs R surface="direct" | max abs difference 4.441e-15 |
 | run_pca_cc_genes gene selection | 500 genes, identical names and order |
 | run_pca_cc_genes rotation, after matching sign | max abs difference 8.049e-16 |
 | run_pca_cc_genes percent variance | max abs difference over 10 components 1.114e-09 |
 | circular_density vs circular::density.circular | max abs difference 2.220e-16 |
-| loess_rsquared_direct | R 0.307040101416, Python 0.307040101416, difference 0.000e+00 |
+| loess_rsquared_direct | R 0.307040101416, Python 0.307040101416, difference 1.110e-16 |
 | diagnose_difference | R 0.826451901598, Python 0.840893005012, difference 1.444e-02 |
 
 ## Tolerance, fixed before measuring

@@ -142,16 +142,18 @@ Measured on human bone marrow single-cell RNA-seq, 8,627 cells, 17,226 genes,
 | Statistic | Measured | Bound, fixed before measuring |
 |---|---|---|
 | Median circular difference in `tricyclePosition` | 0.000e+00 rad | 1e-9 rad |
-| Maximum circular difference, over every cell | 4.796e-14 rad | 1e-6 rad |
-| Maximum arc error, difference times projected radius | 1.202e-14 | 1e-9 |
+| Maximum circular difference, over every cell | 8.882e-16 rad | 1e-6 rad |
+| Maximum arc error, difference times projected radius | 1.148e-14 | 1e-9 |
 | Cells with an identical `CCStage` call | 8,627 of 8,627 | all |
 | `fit_periodic_loess` against R's direct surface | 4.219e-14 | 1e-8 |
+| Reference rotation weights against R's | 0.000e+00, bit-identical | - |
 | `circular_density` against `circular::density.circular` | 2.220e-16 | - |
 | `run_pca_cc_genes` rotation, after matching sign | 8.049e-16 | 1e-6 |
 
-4.8e-14 radians is about fifteen units in the last place of a double. No cell
-inverted. The residual noise concentrates on cells near the embedding centre,
-where `atan2` is ill conditioned, which is why the arc bound is scored as well.
+8.9e-16 radians is four units in the last place of a double, and the median is
+exactly zero: most cells agree bit for bit. No cell inverted. What residual
+there is concentrates on cells near the embedding centre, where `atan2` is ill
+conditioned, which is why the arc bound is scored as well.
 
 ### All four identifier paths, not just the one
 
@@ -162,9 +164,9 @@ extract. Each was scored against R separately, on real data.
 
 | Arm | Cells | Reference genes matched, Python / R | Median circular difference | Maximum |
 |---|---:|---|---|---|
-| mouse, Ensembl | 400 | 500 / 500 | 0.000e+00 rad | 3.997e-15 rad |
-| mouse, symbol | 400 | 500 / 500 | 0.000e+00 rad | 3.997e-15 rad |
-| human, Ensembl | 8,627 | 437 / 437 | 0.000e+00 rad | 6.173e-14 rad |
+| mouse, Ensembl | 400 | 500 / 500 | 0.000e+00 rad | 1.776e-15 rad |
+| mouse, symbol | 400 | 500 / 500 | 0.000e+00 rad | 1.776e-15 rad |
+| human, Ensembl | 8,627 | 437 / 437 | 0.000e+00 rad | 8.882e-16 rad |
 
 The gene count is checked as well as the angle. A mapping that silently lost
 genes would still agree closely on whatever survived on both sides, so
@@ -197,8 +199,10 @@ including that baseline row, are in
 
 The projection never densifies the whole matrix. It takes the per-gene means in
 one sparse pass, then centres and multiplies in blocks over only the matched
-genes. Lower `chunk_size` to cut peak memory further; the result does not
-change.
+genes. Lower `chunk_size` to cut peak memory further. Every cell's result
+depends only on its own row, so the block size does not change what is
+computed, but it can change how BLAS associates the sums within a row:
+measured at 1.7e-14 radians between blocks of 20,000 and 1,000.
 
 R's own `fit_periodic_loess` takes 0.76 s at 8,627 cells using its k-d tree
 approximation. The 8.29 s in the table is R computing the exact surface, which

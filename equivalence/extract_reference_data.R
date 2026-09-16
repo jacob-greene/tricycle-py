@@ -10,7 +10,16 @@ dir.create(out, showWarnings = FALSE, recursive = TRUE)
 e <- new.env(); data("neuroRef", package = "tricycle", envir = e)
 nr <- e[["neuroRef"]]
 nr$rowname <- rownames(nr)
-write.table(nr[, c("rowname","pc1.rot","pc2.rot","ensembl","symbol","SYMBOL")],
+# write.table formats a double at 15 significant digits, which is lossy: the
+# shipped weights then differ from R's by up to tens of units in the last
+# place, and that difference propagates into every projected angle. %.17g is
+# the shortest format that round-trips an IEEE 754 double exactly, so the
+# shipped reference is bit-identical to the one R holds in memory.
+g17 <- function(x) sprintf("%.17g", x)
+write.table(data.frame(rowname = nr$rowname,
+                       pc1.rot = g17(nr$pc1.rot), pc2.rot = g17(nr$pc2.rot),
+                       ensembl = nr$ensembl, symbol = nr$symbol,
+                       SYMBOL = nr$SYMBOL),
             file.path(out, "neuroRef.tsv"), sep = "\t", quote = FALSE, row.names = FALSE)
 
 e2 <- new.env(); data("RevelioGeneList", package = "tricycle", envir = e2)

@@ -19,6 +19,28 @@ def test_neuro_ref_shape_and_first_rows():
     assert ref.rotation[0, 1] == pytest.approx(0.11245580, abs=1e-7)
 
 
+def test_shipped_rotation_weights_round_trip_exactly():
+    """Every shipped weight must be the exact double R holds, not a rounding.
+
+    R's `write.table` writes 15 significant digits. That perturbed 933 of the
+    1000 weights by up to 33 units in the last place, and it was the dominant
+    term in the residual disagreement with R -- larger than summation order.
+    The extractor uses `%.17g`, which round-trips a double exactly. This test
+    stops a regression to the lossy form.
+    """
+    import csv
+    from importlib import resources
+
+    path = resources.files("tricyclepy").joinpath("data", "neuroRef.tsv")
+    with path.open("r", encoding="utf-8") as handle:
+        rows = list(csv.DictReader(handle, delimiter="\t"))
+    assert len(rows) == 500
+    for row in rows:
+        for column in ("pc1.rot", "pc2.rot"):
+            text = row[column]
+            assert "%.17g" % float(text) == text, f"{column}={text} is not exact"
+
+
 def test_neuro_ref_identifiers_are_unique():
     ref = tp.load_neuro_ref()
     for names in (ref.ensembl, ref.symbol, ref.SYMBOL):

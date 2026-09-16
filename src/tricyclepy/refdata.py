@@ -1,9 +1,16 @@
 """Reference data shipped with the package.
 
-Every object here is carried over verbatim from the R package ``tricycle``
-(version 1.12.0, Bioconductor 3.19) or from the Bioconductor annotation
-packages that its ``ENSEMBL`` code paths query. Nothing is regenerated. A
+Every object here is carried over from the R package ``tricycle`` (version
+1.12.0, Bioconductor 3.19) or from the Bioconductor annotation packages that
+its ``ENSEMBL`` code paths query. Nothing is recomputed or re-learned. A
 regenerated reference would not reproduce the R numbers.
+
+The rotation weights are written with ``%.17g``, the shortest format that
+round-trips an IEEE 754 double exactly, so they are bit-identical to the values
+R holds in memory. This matters more than it looks: R's ``write.table``
+defaults to 15 significant digits, which perturbed 933 of the 1000 weights by
+up to 33 units in the last place and was the dominant term in the residual
+disagreement with R.
 
 Provenance is recorded in ``data/PROVENANCE.tsv``.
 """

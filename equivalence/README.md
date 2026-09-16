@@ -12,6 +12,10 @@ Bioconductor package, so the comparison is against the real thing.
 1. `extract_reference_data.R` dumps the data objects `tricycle` ships, and the
    `AnnotationDbi` queries its `ENSEMBL` paths depend on, into plain text.
    Those files ship inside the Python package. They are never regenerated.
+   Doubles are written with `%.17g`, not `write.table`'s default 15 significant
+   digits. The default perturbed 933 of the 1000 rotation weights by up to 33
+   units in the last place, and that was the dominant term in the residual
+   disagreement with R -- larger than summation order.
 2. `export_seurat.R` exports one assay of a Seurat `.rds` to a plain HDF5
    container, and writes fingerprints of it.
 3. `build_h5ad.py` turns that container into an `.h5ad` and re-checks every
