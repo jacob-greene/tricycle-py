@@ -23,6 +23,8 @@ Bioconductor package, so the comparison is against the real thing.
    writes a report.
 7. `benchmark.sh`, `bench_r.R` and `bench_py.py` measure runtime and peak
    resident memory on both sides, each in its own process.
+8. `check_gname_paths.R` and `check_gname_paths.py` score the identifier code
+   paths the main run does not reach.
 
 ## Why an angle needs a circular comparison
 
@@ -92,6 +94,25 @@ Measured sensitivity, nudging one weight out of 461 on a real dataset:
 
 The comparison catches a change of 1e-9 to a single weight. The clean run sits
 eleven orders of magnitude below that floor.
+
+## The identifier code paths
+
+`check_gname_paths.R` and `check_gname_paths.py` score the three
+`species` / `gname_type` combinations the main run does not reach. The mouse
+arms use `neurosphere_example`, the SCE `tricycle` ships, so they need no data
+of yours. The human Ensembl arm relabels a human matrix to the Ensembl ids of
+its symbols, keeping only symbols with exactly one Ensembl id so the
+relabelling is a bijection.
+
+```bash
+Rscript equivalence/check_gname_paths.R "$OUT/gname" "$RDS"   # $RDS optional
+python  equivalence/check_gname_paths.py "$OUT/gname" "$OUT/gname.md"
+```
+
+Both the angle and the number of reference genes matched are scored. A mapping
+that silently dropped genes would still agree on whatever survived, so the
+angle alone is not enough. Measured outcome:
+[`RESULTS_gname_paths.md`](RESULTS_gname_paths.md).
 
 ## Anonymising the report
 

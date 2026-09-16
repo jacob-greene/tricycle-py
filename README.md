@@ -153,6 +153,26 @@ Measured on human bone marrow single-cell RNA-seq, 8,627 cells, 17,226 genes,
 inverted. The residual noise concentrates on cells near the embedding centre,
 where `atan2` is ill conditioned, which is why the arc bound is scored as well.
 
+### All four identifier paths, not just the one
+
+The run above uses `species="human"` with `gname_type="SYMBOL"`. The other
+three combinations resolve reference gene names differently, and two of them
+are where R queries `org.*.eg.db` at run time while this package reads a frozen
+extract. Each was scored against R separately, on real data.
+
+| Arm | Cells | Reference genes matched, Python / R | Median circular difference | Maximum |
+|---|---:|---|---|---|
+| mouse, Ensembl | 400 | 500 / 500 | 0.000e+00 rad | 3.997e-15 rad |
+| mouse, symbol | 400 | 500 / 500 | 0.000e+00 rad | 3.997e-15 rad |
+| human, Ensembl | 8,627 | 437 / 437 | 0.000e+00 rad | 6.173e-14 rad |
+
+The gene count is checked as well as the angle. A mapping that silently lost
+genes would still agree closely on whatever survived on both sides, so
+agreement alone would not have caught it. Full report:
+[`equivalence/RESULTS_gname_paths.md`](equivalence/RESULTS_gname_paths.md).
+
+### Showing the comparison can fail
+
 The comparison has been shown to fail. Nudging a single reference weight out of
 461 by 1e-9 is caught; 1e-10 passes. The clean run sits eleven orders of
 magnitude below that floor. See
