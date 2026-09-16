@@ -1,0 +1,45 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tricycle-py"
+version = "0.1.0"
+description = "Cell cycle position from single-cell RNA-seq on AnnData: a Python port of the R package tricycle"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+keywords = ["single-cell", "cell-cycle", "scRNA-seq", "anndata", "scverse", "tricycle"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Science/Research",
+    "License :: OSI Approved :: GNU General Public License v3 (GPLv3)",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Topic :: Scientific/Engineering :: Bio-Informatics",
+]
+dependencies = [
+    "numpy>=1.23",
+    "scipy>=1.9",
+    "anndata>=0.9",
+    "pandas>=1.5",
+]
+
+[project.optional-dependencies]
+plot = ["matplotlib>=3.6"]
+test = ["pytest>=7.0", "matplotlib>=3.6"]
+
+[project.urls]
+Homepage = "https://github.com/jacob-greene/tricycle-py"
+Issues = "https://github.com/jacob-greene/tricycle-py/issues"
+"Upstream R package" = "https://github.com/hansenlab/tricycle"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tricyclepy"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/", "tests/", "equivalence/", "README.md", "LICENSE", "ATTRIBUTION.md", "CITATION.cff"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+filterwarnings = ["error::DeprecationWarning"]

@@ -1,0 +1,24 @@
+# Scratch used while building the port. None of it belongs in the repository.
+_upstream/
+_rlib/
+_extract/
+_data/
+_run/
+
+# Python
+.venv/
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Editors and platforms
+.DS_Store
+.idea/
+.vscode/
+*.swp
+.ipynb_checkpoints/
