@@ -124,15 +124,32 @@ summary_lines <- c(
   paste0("r_version\t", R.version.string))
 
 # diagnose_totalumi needs raw counts, which are not always present.
+#
+# It is reported on BOTH loess surfaces. The function calls fit_periodic_loess,
+# so on R's default it inherits the k-d tree approximation. Comparing the port's
+# exact surface against R's approximate one is not like for like, and the gap it
+# produces is R's approximation error, not a defect of the port. The direct row
+# is the one to score; the interpolate row is the disclosure.
 counts <- tryCatch(LayerData(o[["RNA"]], "counts"), error = function(e) NULL)
 if (!is.null(counts)) {
-  diag_l <- diagnose_totalumi(theta, Matrix::colSums(counts), plot = FALSE)
-  peak <- max(diag_l$pred.df$y[(diag_l$pred.df$x > 0.75 * pi) & (diag_l$pred.df$x < 1.25 * pi)])
-  valley <- min(diag_l$pred.df$y[(diag_l$pred.df$x > 1.35 * pi) & (diag_l$pred.df$x < 1.85 * pi)])
+  totalumis <- Matrix::colSums(counts)
+  peak_valley <- function(pred) {
+    pk <- max(pred$y[(pred$x > 0.75 * pi) & (pred$x < 1.25 * pi)])
+    vl <- min(pred$y[(pred$x > 1.35 * pi) & (pred$x < 1.85 * pi)])
+    c(pk, vl)
+  }
+  fit_i <- fit_periodic_loess(theta, log2(totalumis + 1))
+  fit_d <- fit_periodic_loess(theta, log2(totalumis + 1),
+                              control = loess.control(surface = "direct"))
+  pv_i <- peak_valley(fit_i$pred.df)
+  pv_d <- peak_valley(fit_d$pred.df)
   summary_lines <- c(summary_lines,
-                     paste0("diagnose_peak\t", g17(peak)),
-                     paste0("diagnose_valley\t", g17(valley)),
-                     paste0("diagnose_difference\t", g17(peak - valley)))
+                     paste0("diagnose_peak\t", g17(pv_i[1])),
+                     paste0("diagnose_valley\t", g17(pv_i[2])),
+                     paste0("diagnose_difference\t", g17(pv_i[1] - pv_i[2])),
+                     paste0("diagnose_peak_direct\t", g17(pv_d[1])),
+                     paste0("diagnose_valley_direct\t", g17(pv_d[2])),
+                     paste0("diagnose_difference_direct\t", g17(pv_d[1] - pv_d[2])))
 }
 writeLines(summary_lines, file.path(outdir, "r_summary.tsv"))
 cat("R side done:", outdir, "\n")

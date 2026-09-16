@@ -13,8 +13,13 @@ R sources. The reference embedding, the marker gene lists and the gene
 identifier maps are carried over from the R package rather than regenerated.
 
 **Licence: GPL-3.** `tricycle` is GPL-3, so this port is too. See
-[`ATTRIBUTION.md`](ATTRIBUTION.md) for what that obliges and for credit to the
-original authors.
+[`ATTRIBUTION.md`](ATTRIBUTION.md) for the copyright notice, what the licence
+obliges, and credit to the original authors.
+
+**Input dtype.** Expression is accepted in any dtype, and the per-gene means
+are accumulated in float64 whichever you give. A float32 matrix, which is the
+common case in the scverse ecosystem, reaches the same answer as float64: both
+agree with R at 8.882e-16 radians on the dataset above.
 
 ## Install
 
@@ -125,6 +130,7 @@ cells by genes. Every function here takes the `AnnData` orientation.
 | `loess` surface | R's `stats::loess` defaults to `surface="interpolate"`, a k-d tree approximation. `loess_fit` implements the exact `surface="direct"` computation. It matches R's direct surface to floating-point noise and differs from R's default by the interpolation error. Both gaps are measured in `equivalence/`. |
 | Gene identifier maps | R queries `org.Hs.eg.db` / `org.Mm.eg.db` at run time. This package ships a frozen extract of the same query. A newer annotation release will change R's answer and not this package's. `PROVENANCE.tsv` records the frozen version; `ensembl_to_symbol=` overrides it. |
 | Version suffixes | Neither R nor this package strips an Ensembl version suffix. `ENSG00000141510.16` fails to map on both sides. Strip it yourself. |
+| `diagnose_total_umi` | It calls `fit_periodic_loess`, so it inherits the surface difference above. Against R's *default* it differs by 1.444e-02, about 1.7 percent, which is R's k-d tree approximation error rather than a port difference. Against R's exact surface it agrees at 1.776e-15. |
 | Plot output | Plots are `matplotlib` axes, not `ggplot2` objects. The computations underneath, including the circular density, are ported; the rendering is not pixel-identical. |
 | PCA backend | `run_pca_cc_genes` uses a NumPy SVD instead of `scater::runPCA`. Gene selection, its variance ranking, centring and scaling all match; the measured rotation difference is 8.0e-16 after matching component signs. Signs themselves are arbitrary on both sides. |
 
@@ -148,6 +154,7 @@ Measured on human bone marrow single-cell RNA-seq, 8,627 cells, 17,226 genes,
 | `fit_periodic_loess` against R's direct surface | 4.219e-14 | 1e-8 |
 | Reference rotation weights against R's | 0.000e+00, bit-identical | - |
 | `circular_density` against `circular::density.circular` | 2.220e-16 | - |
+| `diagnose_total_umi` against R's direct surface | 1.776e-15 | 1e-8 |
 | `run_pca_cc_genes` rotation, after matching sign | 8.049e-16 | 1e-6 |
 
 8.9e-16 radians is four units in the last place of a double, and the median is

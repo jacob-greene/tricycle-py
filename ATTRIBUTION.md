@@ -16,10 +16,31 @@ reproduce the R numbers.
 
 | Work | Authors | Reference |
 |---|---|---|
-| `tricycle` R package and the method | Shijie C. Zheng, Genevieve Stein-O'Brien, Jonathan J. Augustin, Jared Slosberg, Giovanni A. Carosso, Briana Winer, Gloria Shin, Hans T. Bjornsson, Loyal A. Goff, Kasper D. Hansen | Zheng SC et al. *Universal prediction of cell cycle position using transfer learning.* Genome Biology 23:41 (2022). doi:10.1186/s13059-021-02581-y |
+| `tricycle` R package, as credited by the package itself | Shijie C. Zheng, sole author and maintainer | Upstream `DESCRIPTION`, `Authors@R` |
+| The method the package implements | Shijie C. Zheng, Genevieve Stein-O'Brien, Jonathan J. Augustin, Jared Slosberg, Giovanni A. Carosso, Briana Winer, Gloria Shin, Hans T. Bjornsson, Loyal A. Goff, Kasper D. Hansen | Zheng SC et al. *Universal prediction of cell cycle position using transfer learning.* Genome Biology 23:41 (2022). doi:10.1186/s13059-021-02581-y |
 | Five-stage assignment method | Daniel Schwabe et al. | Schwabe D et al. *The transcriptome dynamics of single cells during the cell cycle.* Molecular Systems Biology 16:e9946 (2020). doi:10.15252/msb.20209946 |
 | `RevelioGeneList` marker genes | Michael L. Whitfield et al., by way of the `Revelio` package | Whitfield ML et al. *Identification of genes periodically expressed in the human cell cycle and their expression in tumors.* Molecular Biology of the Cell 13:1977-2000 (2002). doi:10.1091/mbc.02-02-0030 |
 | Local regression | William S. Cleveland et al. | Cleveland WS, Grosse E, Shyu WM. *Local regression models.* In: Statistical Models in S (1992) |
+
+## Copyright
+
+    tricycle-py, a Python port of the R package tricycle.
+    Copyright (C) 2026 the tricycle-py authors.
+
+    This program is free software: you can redistribute it and/or modify it
+    under the terms of the GNU General Public License as published by the Free
+    Software Foundation, version 3.
+
+    This program is distributed in the hope that it will be useful, but WITHOUT
+    ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+    FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+    more details.
+
+    You should have received a copy of the GNU General Public License along
+    with this program. If not, see <https://www.gnu.org/licenses/>.
+
+Copyright in the original `tricycle` R package remains with its authors. This
+notice covers only the port.
 
 ## Licence
 

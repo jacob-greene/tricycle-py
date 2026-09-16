@@ -61,11 +61,12 @@ The worst cell sits at projected radius 3.692e+00, against a median radius of 3.
 | fit_periodic_loess vs R default surface="interpolate" | max abs difference 8.223e-01 |
 | loess prediction curve vs R surface="direct" | max abs difference 4.441e-15 |
 | run_pca_cc_genes gene selection | 500 genes, identical names and order |
-| run_pca_cc_genes rotation, after matching sign | max abs difference 8.049e-16 |
-| run_pca_cc_genes percent variance | max abs difference over 10 components 1.114e-09 |
+| run_pca_cc_genes rotation, after matching sign | max abs difference 6.939e-16 |
+| run_pca_cc_genes percent variance | max abs difference over 10 components 9.140e-10 |
 | circular_density vs circular::density.circular | max abs difference 2.220e-16 |
 | loess_rsquared_direct | R 0.307040101416, Python 0.307040101416, difference 1.110e-16 |
-| diagnose_difference | R 0.826451901598, Python 0.840893005012, difference 1.444e-02 |
+| diagnose_totalumi vs R surface="direct" | R 0.840893005012, Python 0.840893005012, difference 1.776e-15 |
+| diagnose_totalumi vs R default surface="interpolate" | R 0.826451901598, Python 0.840893005012, difference 1.444e-02, which is R's k-d tree approximation error, not a port difference |
 
 ## Tolerance, fixed before measuring
 

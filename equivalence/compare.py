@@ -42,6 +42,11 @@ TOL_MAX_ARC = 1e-9
 #: Gene means must agree before any angle comparison is scored.
 TOL_GENE_MEAN = 1e-12
 
+#: `diagnose_totalumi` against R on the same loess surface. It is a difference
+#: of two loess-fitted values rather than a single one, so it carries a little
+#: more accumulated error than the fit itself.
+TOL_DIAGNOSE = 1e-8
+
 TOLERANCE_RATIONALE = f"""\
 Both implementations do the same three steps in IEEE 754 double precision:
 subtract a per-gene mean, take a dot product over a few hundred genes, then
@@ -299,11 +304,37 @@ def compare(r_dir: str, py_dir: str, report_path: str, label: str,
     rows.append(("circular_density vs circular::density.circular",
                  f"max abs difference {d_den:.3e}"))
 
-    for key in ("loess_rsquared_direct", "diagnose_difference"):
-        if key in r_summary and key in py_summary:
-            rv, pv = float(r_summary[key]), float(py_summary[key])
-            rows.append((key, f"R {rv:.12g}, Python {pv:.12g}, "
-                              f"difference {abs(rv - pv):.3e}"))
+    if "loess_rsquared_direct" in r_summary and "loess_rsquared_direct" in py_summary:
+        rv = float(r_summary["loess_rsquared_direct"])
+        pv = float(py_summary["loess_rsquared_direct"])
+        rows.append(("loess_rsquared_direct",
+                     f"R {rv:.12g}, Python {pv:.12g}, "
+                     f"difference {abs(rv - pv):.3e}"))
+        if abs(rv - pv) > 1e-8:
+            failures.append(f"loess R-squared differs by {abs(rv - pv):.3e}")
+
+    # diagnose_totalumi calls fit_periodic_loess, so on R's default surface it
+    # inherits the k-d tree approximation. Score it against R's direct surface,
+    # which is the same computation, and report the default-surface gap as
+    # disclosure rather than as a failure.
+    if "diagnose_difference" in py_summary:
+        py_diff = float(py_summary["diagnose_difference"])
+        if "diagnose_difference_direct" in r_summary:
+            rv = float(r_summary["diagnose_difference_direct"])
+            delta = abs(rv - py_diff)
+            rows.append(("diagnose_totalumi vs R surface=\"direct\"",
+                         f"R {rv:.12g}, Python {py_diff:.12g}, "
+                         f"difference {delta:.3e}"))
+            if delta > TOL_DIAGNOSE:
+                failures.append(
+                    f"diagnose_totalumi differs from R's direct surface by "
+                    f"{delta:.3e}")
+        if "diagnose_difference" in r_summary:
+            rv = float(r_summary["diagnose_difference"])
+            rows.append(("diagnose_totalumi vs R default surface=\"interpolate\"",
+                         f"R {rv:.12g}, Python {py_diff:.12g}, difference "
+                         f"{abs(rv - py_diff):.3e}, which is R's k-d tree "
+                         f"approximation error, not a port difference"))
 
     lines.append("| Function | Result |")
     lines.append("|---|---|")
