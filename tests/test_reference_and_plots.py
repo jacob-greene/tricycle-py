@@ -95,6 +95,60 @@ def test_diagnose_total_umi_passes_a_cycling_profile():
     assert result.difference > 0.4
 
 
+def _umi_profile(theta, amplitude, peak_at=np.pi):
+    """Total UMIs that peak at `peak_at`, with a given log2 half-amplitude."""
+    return 2.0 ** (12.0 + amplitude * np.cos(theta - peak_at))
+
+
+def test_the_pass_threshold_is_04_not_something_smaller():
+    """A profile between 0.04 and 0.4 must fail. It pins the constant."""
+    theta = np.linspace(0, 2 * np.pi, 800, endpoint=False)
+    result = tp.diagnose_total_umi(theta, _umi_profile(theta, 0.5))
+    assert result.passed and result.difference > 0.4
+
+    with pytest.warns(RuntimeWarning, match="below 0.4"):
+        weak = tp.diagnose_total_umi(theta, _umi_profile(theta, 0.06))
+    assert not weak.passed
+    assert 0.04 < weak.difference < 0.4        # or the test proves nothing
+
+
+def test_the_peak_and_valley_windows_are_the_ones_r_uses():
+    """Pin the four window bounds against the fitted curve the result carries.
+
+    Going through the returned numbers alone cannot pin these: the loess fit is
+    wide, so moving a bound by a twentieth of a turn barely moves the peak.
+    Recomputing the peak and valley from the result's own prediction curve,
+    with the bounds written out literally, does pin them.
+    """
+    theta = np.linspace(0, 2 * np.pi, 800, endpoint=False)
+    result = tp.diagnose_total_umi(theta, _umi_profile(theta, 0.8))
+    x, y = result.fit.pred_x, result.fit.pred_y
+    pi = np.pi
+    want_peak = float(y[(x > 0.75 * pi) & (x < 1.25 * pi)].max())
+    want_valley = float(y[(x > 1.35 * pi) & (x < 1.85 * pi)].min())
+    assert result.peak == pytest.approx(want_peak, abs=0.0)
+    assert result.valley == pytest.approx(want_valley, abs=0.0)
+    assert result.difference == pytest.approx(want_peak - want_valley, abs=0.0)
+
+
+def test_the_peak_window_lower_bound_is_075pi():
+    """Separate 0.75*pi from a nearby bound with a profile that peaks between.
+
+    On a profile peaking at pi the bound does not matter, because the maximum
+    is far inside every candidate window. A profile peaking at 0.70*pi puts the
+    maximum between the real bound and a loosened one, so the two disagree.
+    """
+    theta = np.linspace(0, 2 * np.pi, 800, endpoint=False)
+    with pytest.warns(RuntimeWarning):
+        result = tp.diagnose_total_umi(theta, _umi_profile(theta, 0.8, 0.70 * np.pi))
+    x, y = result.fit.pred_x, result.fit.pred_y
+    pi = np.pi
+    correct = float(y[(x > 0.75 * pi) & (x < 1.25 * pi)].max())
+    loosened = float(y[(x > 0.70 * pi) & (x < 1.25 * pi)].max())
+    assert loosened > correct + 1e-3        # the two windows really differ here
+    assert result.peak == pytest.approx(correct, abs=0.0)
+
+
 def test_diagnose_total_umi_warns_on_a_flat_profile():
     theta = np.linspace(0, 2 * np.pi, 600, endpoint=False)
     umis = np.full(600, 4000.0)

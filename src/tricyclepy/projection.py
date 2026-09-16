@@ -21,8 +21,11 @@ __all__ = ["project_cycle_space", "estimate_cycle_position", "theta_from_embeddi
 
 logger = logging.getLogger(__name__)
 
-#: Cells per block when centring and projecting. Bounds peak memory without
-#: changing the arithmetic: each block is centred densely, exactly as R does.
+#: Cells per block when centring and projecting. Each block is centred densely,
+#: exactly as R does, and every cell's result depends only on its own row. The
+#: block size therefore does not change what is computed, but it can change how
+#: BLAS associates the sums inside a row: measured at 1.7e-14 radians between
+#: blocks of 20,000 and 1,000 on 8,627 cells, which is floating-point noise.
 DEFAULT_CHUNK_SIZE = 20_000
 
 Matrixlike = Union["AnnData", np.ndarray, sp.spmatrix]  # noqa: F821
@@ -156,7 +159,8 @@ def project_cycle_space(
     key_added
         Key in ``adata.obsm`` to write. Ignored for a bare matrix.
     chunk_size
-        Cells per block. Lower it to cut peak memory; results do not change.
+        Cells per block. Lower it to cut peak memory. The result changes only
+        by floating-point re-association, far below any meaningful tolerance.
     copy
         Return a modified copy instead of writing in place.
 

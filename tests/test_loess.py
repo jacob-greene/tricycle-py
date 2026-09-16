@@ -6,8 +6,47 @@ import numpy as np
 import pytest
 
 from tricyclepy import fit_periodic_loess, loess_fit
+from tricyclepy.loess import _neighbourhood_size, _window_starts
 
 RNG = np.random.default_rng(11)
+
+
+def test_window_holds_exactly_the_q_nearest_neighbours():
+    """The local window must be the true q nearest, checked by brute force.
+
+    The window start is found by bisection, and the answer sits on either side
+    of the crossing. Taking the wrong side of it is an off-by-one that leaves
+    the fit looking plausible while degrading agreement with R by twelve orders
+    of magnitude. Brute force is slow and obviously correct, so it is the
+    reference here.
+    """
+    rng = np.random.default_rng(99)
+    for n, span in ((60, 0.3), (60, 0.5), (137, 0.2), (200, 0.75)):
+        xs = np.sort(rng.uniform(-5, 5, n))
+        q = _neighbourhood_size(n, span)
+        at = np.concatenate([xs, rng.uniform(-6, 6, 50)])
+        starts = _window_starts(xs, at, q)
+        for k, x0 in enumerate(at):
+            got = set(range(starts[k], starts[k] + q))
+            want = set(np.argsort(np.abs(xs - x0), kind="stable")[:q].tolist())
+            assert got == want, f"n={n} span={span} at={x0}"
+
+
+def test_window_crossing_is_not_off_by_one_on_an_asymmetric_neighbourhood():
+    """A known-answer case that separates the two candidate windows.
+
+    Bisection lands on the first start where the left edge is no farther than
+    the right. For x0 = 2.5 that start is 1, and it is the wrong one: window
+    [1, 4) reaches out to 10.0, while window [0, 3) stops at 2.0. Taking the
+    bisection answer without comparing it against the start below is exactly
+    the off-by-one this pins.
+    """
+    xs = np.array([0.0, 1.0, 2.0, 10.0, 11.0])
+    q = 3
+    # Nearest three to 2.5 are 2.0, 1.0 and 0.0, which is the window [0, 3).
+    assert _window_starts(xs, np.array([2.5]), q)[0] == 0
+    # Nearest three to 9.0 are 10.0, 11.0 and 2.0, which is the window [2, 5).
+    assert _window_starts(xs, np.array([9.0]), q)[0] == 2
 
 
 def test_degree_two_reproduces_a_quadratic_exactly():

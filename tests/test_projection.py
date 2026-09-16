@@ -48,13 +48,35 @@ def test_gene_order_follows_the_data_not_the_reference():
 
 
 def test_duplicate_gene_names_take_the_first_occurrence():
-    """R's `data.m[gene, ]` takes the first row carrying that name."""
+    """R's `data.m[gene, ]` takes the first row carrying that name.
+
+    The duplicate column must vary across cells. A constant column centres to
+    exactly zero, so counting it twice would add nothing and the test would
+    pass whether or not the rule is implemented.
+    """
     adata = _toy(genes=("GA", "GB", "GA"))
-    adata.X[:, 2] = 999.0                      # the duplicate must be ignored
+    adata.X[:, 2] = RNG.random(adata.n_obs) * 50.0 + 10.0
+    assert adata.X[:, 2].std() > 1.0           # or the test proves nothing
     ref = _reference(["GA"], [[1.0, 0.0]])
     out = tp.project_cycle_space(adata, ref=ref, copy=True)
     want = _expected(adata.X, [0], np.array([[1.0, 0.0]]))
-    assert np.allclose(out.obsm["tricycleEmbedding"], want)
+    got = out.obsm["tricycleEmbedding"]
+    assert np.allclose(got, want)
+    # And it must not be the answer you would get by using both copies.
+    both = _expected(adata.X, [0, 2], np.array([[1.0, 0.0], [1.0, 0.0]]))
+    assert not np.allclose(got, both)
+
+
+def test_duplicate_reference_names_take_the_first_reference_row():
+    """The same first-occurrence rule applies on the reference side."""
+    adata = _toy(genes=("GA", "GB"))
+    ref = _reference(["GA", "GA"], [[1.0, 0.0], [0.0, 7.0]])
+    out = tp.project_cycle_space(adata, ref=ref, copy=True)
+    want = _expected(adata.X, [0], np.array([[1.0, 0.0]]))
+    got = out.obsm["tricycleEmbedding"]
+    assert np.allclose(got, want)
+    last = _expected(adata.X, [0], np.array([[0.0, 7.0]]))
+    assert not np.allclose(got, last)
 
 
 def test_unmatched_genes_are_dropped_and_missing_names_are_skipped():

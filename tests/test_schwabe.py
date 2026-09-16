@@ -8,7 +8,7 @@ import pandas as pd
 import pytest
 
 import tricyclepy as tp
-from tricyclepy.schwabe import _assign, _scale_columns
+from tricyclepy.schwabe import _assign, _scale_columns, _stage_score
 
 
 def _called(adata):
@@ -139,11 +139,50 @@ def test_a_gap_below_the_tolerance_leaves_the_cell_unassigned():
 
 
 def test_ties_are_broken_by_stage_order_as_r_does():
-    tied = np.array([[1.0, 1.0, 0.0, -1.0, -2.0]])
-    # R's order() is stable, so the earlier stage wins and the gap is zero,
-    # which then fails the tolerance test.
-    assert _assign(tied, STAGES, tolerance=0.3)[0] is None
-    assert _assign(tied, STAGES, tolerance=-1.0)[0] == "G1.S"
+    """R's order() is stable, so among equal scores the earlier stage wins.
+
+    One tie pattern does not pin this. NumPy's quicksort agrees with a stable
+    sort on many small inputs by accident, so a single case passes whether or
+    not stability is asked for. Every tie position is swept instead, at the
+    five shipped stages and at a longer custom cycle where an unstable sort
+    reorders almost every draw.
+    """
+    for k in range(4):
+        scores = np.full((1, 5), -5.0)
+        scores[0, k] = scores[0, k + 1] = 1.0        # adjacent pair, tied
+        assert _assign(scores, STAGES, tolerance=-1.0)[0] == STAGES[k]
+
+    long_stages = [f"S{i}" for i in range(30)]
+    rng = np.random.default_rng(3)
+    for _ in range(200):
+        scores = rng.integers(0, 3, (1, 30)).astype(float)
+        top = float(scores.max())
+        first = int(np.flatnonzero(scores[0] == top)[0])
+        out = _assign(scores, long_stages, tolerance=-1.0)[0]
+        if out is not None:
+            assert out == long_stages[first]
+
+
+def test_the_correlation_floor_is_strict_not_inclusive():
+    """R keeps a marker when `cor > corThres`, so equality is excluded."""
+    rng = np.random.default_rng(7)
+    block = rng.normal(0.0, 1.0, (6, 40)) + 5.0       # genes by cells
+    rows = np.arange(6)
+
+    sub = block[rows]
+    mean_v = sub.mean(axis=0)
+    centred = sub - sub.mean(axis=1, keepdims=True)
+    mc = mean_v - mean_v.mean()
+    cor = (centred @ mc) / (np.sqrt((centred ** 2).sum(axis=1))
+                            * np.sqrt((mc ** 2).sum()))
+    cut = float(np.sort(cor)[2])                      # one gene sits exactly here
+
+    at_threshold = _stage_score(block, rows, cut, "S", 1)
+    just_below = _stage_score(block, rows, np.nextafter(cut, -np.inf), "S", 1)
+    # The gene whose correlation equals the cut must be excluded, so the two
+    # scores must differ. An inclusive comparison makes them identical.
+    assert not np.allclose(at_threshold, just_below)
+    assert np.allclose(at_threshold, block[rows][cor > cut].mean(axis=0))
 
 
 def test_nan_scores_raise_rather_than_assign_silently():
