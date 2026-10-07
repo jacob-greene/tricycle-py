@@ -119,6 +119,15 @@ implementation, `astropy.stats.circcorrcoef` and `pingouin.circ_corrcc` agree
 to all 15 printed digits. Shuffling the R positions across cells drops r to
 -0.005 and -0.003, so the statistic is able to move.
 
+The stage bins of columns 3 to 5 are G1/G0 (1.75π to 0.5π, through 0), S
+(0.5π to π) and G2/M (π to 1.75π). The Python and R positions put every cell
+in the same bin.
+
+| Dataset | G1/G0 cells | S cells | G2/M cells | Cells in the same bin, Python and R |
+|---|---:|---:|---:|---:|
+| Human bone marrow | 5,823 | 1,637 | 1,167 | 8,627 of 8,627 |
+| Human CD34+ HSPC | 4,195 | 1,959 | 727 | 6,881 of 6,881 |
+
 ## Tests
 
 ```bash

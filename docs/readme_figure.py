@@ -1,18 +1,24 @@
-"""Build the README figure: one row per dataset, three panels per row.
+"""Build the README figure: one row per dataset, five panels per row.
 
 Panels, left to right:
 
-1. UMAP coloured by cell type.
+1. UMAP coloured by cell type, with the palette stored in the input.
 2. UMAP coloured by the cell cycle position this package computes.
-3. Python position against R ``tricycle`` position for the same cells, with
-   the circular correlation coefficient.
+3. UMAP coloured by cell cycle stage bin (G1/G0, S, G2/M).
+4. The tricycle embedding, coloured by stage bin. Rays from the origin mark
+   the bin edges; the position is the angle of each cell about the origin.
+5. Python position against R ``tricycle`` position for the same cells, with
+   the circular correlation coefficient and lines at the bin edges.
+
+Each column has one legend, shared by every row.
 
 Each input is an ``.h5ad`` that holds:
 
 * ``X``: log-normalised expression, cells by genes, gene symbols as
   ``var_names``;
 * ``obsm["X_umap"]``: a two-dimensional embedding;
-* ``obs[<celltype key>]``: a categorical cell type label;
+* ``obs[<celltype key>]``: a categorical cell type label, with its colours in
+  ``uns["<celltype key>_colors"]`` in category order (the scanpy convention);
 * ``obs[<R key>]``: ``tricyclePosition`` from R ``tricycle`` on the same
   matrix (see ``equivalence/run_r.R``).
 
@@ -25,6 +31,22 @@ Usage::
         --row "Human bone marrow" bmmc.h5ad \\
         --row "Human CD34+ HSPC" cd34.h5ad \\
         --out docs/readme_figure.png
+
+One legend must be true for every row, so one cell type palette is used for
+all rows: the palette of the row named by ``--palette-row`` (the first row by
+default). That row must carry every cell type of every row.
+
+Stage bins follow the tricycle vignette (Zheng et al. 2022, *Genome Biology*
+23:41): position 0.5π is about the start of S, π the start of G2/M, 1.5π the
+middle of M, and 1.75π to 0.25π is G1/G0. To cover the whole circle, the
+bins here are
+
+* G1/G0: 1.75π to 0.5π, through 0 (the vignette's G1/G0, plus 0.25π to 0.5π
+  before the start of S);
+* S: 0.5π to π;
+* G2/M: π to 1.75π.
+
+The bins are a guide. The position itself is continuous.
 
 The circular correlation is the Jammalamadaka-SenGupta coefficient
 (Jammalamadaka and SenGupta 2001, *Topics in Circular Statistics*, eq. 8.2.2):
@@ -52,6 +74,13 @@ import tricyclepy as tp  # noqa: E402
 
 TWO_PI = 2.0 * np.pi
 
+#: Bin edges in radians: start of S, start of G2/M, start of G1/G0.
+S_START, G2M_START, G1_START = 0.5 * np.pi, np.pi, 1.75 * np.pi
+EDGES = ((S_START, "0.5π"), (G2M_START, "π"), (G1_START, "1.75π"))
+STAGES = ("G1/G0", "S", "G2/M")
+#: Middle of each bin; the bin colour is the cyclic colour at that angle.
+STAGE_MID = {"G1/G0": 0.125 * np.pi, "S": 0.75 * np.pi, "G2/M": 1.375 * np.pi}
+
 
 def circular_mean(a: np.ndarray) -> float:
     return float(np.arctan2(np.sin(a).sum(), np.cos(a).sum()))
@@ -72,6 +101,15 @@ def circular_difference(a, b) -> np.ndarray:
     return np.minimum(d, TWO_PI - d)
 
 
+def stage_bin(theta) -> np.ndarray:
+    """Name the stage bin of each position (radians on [0, 2*pi))."""
+    theta = np.mod(np.asarray(theta, dtype=np.float64), TWO_PI)
+    out = np.full(theta.shape, "G1/G0", dtype=object)
+    out[(theta >= S_START) & (theta < G2M_START)] = "S"
+    out[(theta >= G2M_START) & (theta < G1_START)] = "G2/M"
+    return out
+
+
 def style() -> None:
     rc = plt.rcParams
     rc["figure.dpi"] = 150
@@ -81,18 +119,19 @@ def style() -> None:
     rc["axes.grid"] = False
     rc["font.family"] = "sans-serif"
     rc["font.sans-serif"] = ["Helvetica", "Arial", "Liberation Sans", "DejaVu Sans"]
-    rc["font.size"] = 10
+    rc["font.size"] = 14
+    rc["axes.titlesize"] = 15
+    rc["legend.fontsize"] = 14
+    rc["legend.title_fontsize"] = 15
     rc["pdf.fonttype"] = 42
 
 
-def celltype_palette(categories) -> dict:
-    """One fixed colour per cell type, shared by every row."""
-    base = [matplotlib.colors.rgb2hex(c) for c in matplotlib.colormaps["Paired"].colors]
-    extra = [matplotlib.colors.rgb2hex(c) for c in matplotlib.colormaps["Dark2"].colors]
-    colours = base + extra
-    cats = sorted(categories)
-    if len(cats) > len(colours):
-        raise ValueError(f"{len(cats)} cell types; at most {len(colours)} supported")
+def stored_palette(a, key: str) -> dict:
+    """Cell type to colour, from ``uns[key + '_colors']`` in category order."""
+    cats = list(a.obs[key].cat.categories)
+    colours = list(a.uns[f"{key}_colors"])
+    if len(cats) != len(colours):
+        raise ValueError(f"{len(cats)} categories but {len(colours)} colours")
     return dict(zip(cats, colours))
 
 
@@ -100,8 +139,13 @@ def umap_axes(ax) -> None:
     ax.set_aspect("equal")
     ax.set_xticks([])
     ax.set_yticks([])
-    ax.set_xlabel("UMAP1")
-    ax.set_ylabel("UMAP2")
+
+
+def dot_legend(ax, labels, colours, title) -> None:
+    handles = [plt.Line2D([], [], marker="o", ls="", ms=10, color=c) for c in colours]
+    ax.legend(handles, labels, title=title, loc="center left", frameon=False,
+              ncol=1, handletextpad=0.3, borderaxespad=0.0, labelspacing=0.35,
+              alignment="left")
 
 
 def main(argv=None) -> None:
@@ -109,6 +153,8 @@ def main(argv=None) -> None:
     p.add_argument("--row", nargs=2, action="append", required=True,
                    metavar=("LABEL", "H5AD"), help="row label and input file")
     p.add_argument("--celltype-key", default="celltype")
+    p.add_argument("--palette-row", type=int, default=0,
+                   help="row whose stored cell type palette every row uses")
     p.add_argument("--r-key", default="tricyclePosition_R")
     p.add_argument("--species", default="human")
     p.add_argument("--gname-type", default="SYMBOL")
@@ -124,70 +170,173 @@ def main(argv=None) -> None:
         tp.estimate_cycle_position(a, species=args.species, gname_type=args.gname_type)
         rows.append((label, a))
 
-    palette = celltype_palette(
-        set().union(*(set(a.obs[args.celltype_key].astype(str)) for _, a in rows)))
+    key = args.celltype_key
+    palette = stored_palette(rows[args.palette_row][1], key)
+    for label, a in rows:
+        own = stored_palette(a, key)
+        missing = set(own) - set(palette)
+        if missing:
+            raise ValueError(f"{label}: no shared colour for {sorted(missing)}")
+        differ = sorted(c for c in own if own[c] != palette[c])
+        if differ:
+            print(f"{label}: own stored colour replaced by the shared palette "
+                  f"for {len(differ)} cell types")
     cmap = tp.cyclic_colormap()
     norm = Normalize(0.0, TWO_PI)
+    stage_colour = {s: matplotlib.colors.rgb2hex(cmap(norm(m))) for s, m in STAGE_MID.items()}
     rng = np.random.default_rng(args.seed)
 
     n = len(rows)
-    fig = plt.figure(figsize=(15.0, 4.2 * n))
-    gs = fig.add_gridspec(n, 6, width_ratios=[1.0, 0.62, 1.0, 0.04, 0.22, 1.0],
-                          wspace=0.08, hspace=0.25)
+    # Panel columns 0, 2, 4, 6, 8; legend columns 1, 3 and 5, each shared by
+    # every row; column 7 is a spacer. Panel 4 reuses the stage colours of the column 5 legend.
+    fig = plt.figure(figsize=(24.0, 4.9 * n))
+    gs = fig.add_gridspec(n, 9, width_ratios=[1.0, 0.42, 1.0, 0.22, 1.0, 0.42, 1.0, 0.30, 1.0],
+                          wspace=0.12, hspace=0.12)
+    present = set()
 
     for i, (label, a) in enumerate(rows):
         xy = np.asarray(a.obsm["X_umap"])
-        ct = a.obs[args.celltype_key].astype(str).to_numpy()
+        ct = a.obs[key].astype(str).to_numpy()
+        present |= set(ct)
         py = a.obs["tricyclePosition"].to_numpy(np.float64)
         rr = a.obs[args.r_key].to_numpy(np.float64)
+        emb = np.asarray(a.obsm["tricycleEmbedding"])[:, :2]
+        # the angle drawn in panel 4 is the position itself
+        assert np.allclose(circular_difference(np.arctan2(emb[:, 1], emb[:, 0]), py), 0.0)
+        stage = stage_bin(py)
         order = rng.permutation(a.n_obs)
         r = circular_correlation(py, rr)
         dmax = float(circular_difference(py, rr).max())
         n_genes = a.uns["tricycleEmbedding"]["n_genes"]
+        agree = float(np.mean(stage == stage_bin(rr)))
+        counts = {s: int((stage == s).sum()) for s in STAGES}
         print(f"{label}: cells={a.n_obs} genes={n_genes} r={r:.15f} "
-              f"max_circ_diff={dmax:.3e}")
+              f"max_circ_diff={dmax:.3e} bins={counts} bin_agreement={agree:.6f}")
+        stage_c = np.array([stage_colour[s] for s in stage], dtype=object)
+        top = i == 0
 
+        # 1. cell type, with the row label on its left
         ax = fig.add_subplot(gs[i, 0])
         ax.scatter(xy[order, 0], xy[order, 1], s=args.point_size, linewidths=0,
                    c=[palette[c] for c in ct[order]], rasterized=True)
         umap_axes(ax)
-        ax.set_title(f"{label}\n{a.n_obs:,} cells: cell type", loc="left")
-        lax = fig.add_subplot(gs[i, 1])
-        lax.axis("off")
-        present = sorted(set(ct))
-        handles = [plt.Line2D([], [], marker="o", ls="", ms=5, color=palette[c])
-                   for c in present]
-        lax.legend(handles, present, loc="center left", frameon=False,
-                   fontsize=7.5, ncol=1 if len(present) <= 10 else 2,
-                   handletextpad=0.2, columnspacing=0.6, borderaxespad=0.0)
+        ax.text(-0.06, 0.5, f"{label}\n{a.n_obs:,} cells", transform=ax.transAxes,
+                rotation=90, ha="right", va="center", fontsize=15, fontweight="bold")
+        if top:
+            ax.set_title("UMAP: cell type", loc="left")
 
+        # 2. position
         ax = fig.add_subplot(gs[i, 2])
-        sc = ax.scatter(xy[order, 0], xy[order, 1], s=args.point_size, linewidths=0,
-                        c=py[order], cmap=cmap, norm=norm, rasterized=True)
+        ax.scatter(xy[order, 0], xy[order, 1], s=args.point_size, linewidths=0,
+                   c=py[order], cmap=cmap, norm=norm, rasterized=True)
         umap_axes(ax)
-        ax.set_title("cell cycle position (Python)", loc="left")
-        cax = fig.add_subplot(gs[i, 3])
-        cax.set_box_aspect(12)
-        cb = fig.colorbar(sc, cax=cax, ticks=[0, np.pi, TWO_PI])
-        cb.ax.set_yticklabels(["0", "π", "2π"])
-        cb.outline.set_visible(False)
+        if top:
+            ax.set_title("UMAP: cell cycle position θ", loc="left")
 
-        ax = fig.add_subplot(gs[i, 5])
+        # 3. stage bin on the UMAP
+        ax = fig.add_subplot(gs[i, 4])
+        ax.scatter(xy[order, 0], xy[order, 1], s=args.point_size, linewidths=0,
+                   c=list(stage_c[order]), rasterized=True)
+        umap_axes(ax)
+        if top:
+            ax.set_title("UMAP: stage bin of θ", loc="left")
+
+        # 4. tricycle embedding; θ is the angle about the origin
+        ax = fig.add_subplot(gs[i, 6])
+        ax.scatter(emb[order, 0], emb[order, 1], s=args.point_size, linewidths=0,
+                   c=list(stage_c[order]), rasterized=True)
+        lo = np.minimum(emb.min(axis=0), 0.0)
+        hi = np.maximum(emb.max(axis=0), 0.0)
+        pad = 0.10 * (hi - lo)
+        lo, hi = lo - pad, hi + pad
+        ax.set_xlim(lo[0], hi[0])
+        ax.set_ylim(lo[1], hi[1])
+        ax.set_aspect("equal")
+        ax.axhline(0, color="0.8", lw=0.6, zorder=0)
+        ax.axvline(0, color="0.8", lw=0.6, zorder=0)
+
+        def to_edge(angle):
+            # distance from the origin to the axes edge along this angle
+            c, s = np.cos(angle), np.sin(angle)
+            t = [(hi[0] if c > 0 else lo[0]) / c if abs(c) > 1e-12 else np.inf,
+                 (hi[1] if s > 0 else lo[1]) / s if abs(s) > 1e-12 else np.inf]
+            return 0.97 * min(t), c, s
+
+        t, c, s = to_edge(0.0)
+        ax.annotate("", xy=(t, 0), xytext=(0, 0), zorder=3,
+                    arrowprops=dict(arrowstyle="-|>", color="black", lw=1.4))
+        ax.text(0.97 * hi[0], 0.04 * (hi[1] - lo[1]), "θ = 0", ha="right",
+                va="bottom", fontsize=13, zorder=5,
+                bbox=dict(boxstyle="round,pad=0.15", fc="white", ec="none", alpha=0.9))
+        for angle, text in EDGES:
+            t, c, s = to_edge(angle)
+            ax.plot([0, t * c], [0, t * s], color="black", lw=1.2, ls="--", zorder=3)
+            ax.text(0.80 * t * c, 0.80 * t * s, text, fontsize=13, zorder=4,
+                    ha="center", va="center",
+                    bbox=dict(boxstyle="round,pad=0.15", fc="white", ec="none", alpha=0.9))
+        # counter-clockwise arrow: θ increases from embedding 1 towards embedding 2
+        rad = 0.55 * min(hi[0], hi[1])
+        ax.annotate("", xy=(rad * np.cos(1.2), rad * np.sin(1.2)), xytext=(rad, 0.0),
+                    zorder=4, arrowprops=dict(arrowstyle="-|>", color="black", lw=1.2,
+                                              connectionstyle="arc3,rad=0.4"))
+        ax.set_xticks([])
+        ax.set_yticks([])
+        ax.set_xlabel("tricycle embedding 1")
+        ax.set_ylabel("tricycle embedding 2")
+        if top:
+            ax.set_title("tricycle embedding: θ", loc="left")
+
+        # 5. Python against R
+        ax = fig.add_subplot(gs[i, 8])
         ax.scatter(rr[order], py[order], s=args.point_size, linewidths=0,
                    c=py[order], cmap=cmap, norm=norm, rasterized=True)
         ax.set_aspect("equal")
         ax.set_xlim(0, TWO_PI)
         ax.set_ylim(0, TWO_PI)
+        for angle, _ in EDGES:
+            ax.axvline(angle, color="0.4", lw=0.9, ls="--", zorder=0)
+            ax.axhline(angle, color="0.4", lw=0.9, ls="--", zorder=0)
+        # 2π is the top-right corner; its label would collide with 1.75π
+        ticks = [0.0] + [e for e, _ in EDGES]
+        names = ["0"] + [t for _, t in EDGES]
         for axis in (ax.xaxis, ax.yaxis):
-            axis.set_ticks([0, TWO_PI])
-            axis.set_ticklabels(["0", "2π"])
+            axis.set_ticks(ticks)
+            axis.set_ticklabels(names, fontsize=12)
+        # bin names inside the panel, along the bottom edge of each bin
+        for name, b0, b1, rot in (("G1/G0", 0.0, S_START, 0), ("S", S_START, G2M_START, 0),
+                                  ("G2/M", G2M_START, G1_START, 0),
+                                  ("G1/G0", G1_START, TWO_PI, 90)):
+            ax.text(0.5 * (b0 + b1), 0.12 if rot == 0 else 0.25, name, rotation=rot,
+                    ha="center", va="bottom", fontsize=12, color="0.15")
         ax.spines["left"].set_visible(True)
         ax.spines["bottom"].set_visible(True)
-        ax.set_xlabel("R tricycle position (rad)")
-        ax.set_ylabel("Python position (rad)")
-        ax.set_title("Python against R", loc="left")
-        ax.text(0.04, 0.96, f"circular r = {r:.6f}\nmax difference {dmax:.1e} rad\n{n_genes} genes",
-                transform=ax.transAxes, va="top", ha="left", fontsize=9)
+        ax.set_xlabel("R tricycle θ")
+        ax.set_ylabel("Python θ")
+        if top:
+            ax.set_title("Python against R", loc="left")
+        ax.text(0.04, 0.96, f"circular r = {r:.6f}\nmax diff {dmax:.1e} rad",
+                transform=ax.transAxes, va="top", ha="left", fontsize=12,
+                bbox=dict(boxstyle="round,pad=0.2", fc="white", ec="none", alpha=0.9))
+
+    # One legend per column, spanning every row.
+    lax = fig.add_subplot(gs[:, 1])
+    lax.axis("off")
+    cts = [c for c in palette if c in present]
+    dot_legend(lax, cts, [palette[c] for c in cts], "cell type")
+
+    hold = fig.add_subplot(gs[:, 3])
+    hold.axis("off")
+    cax = hold.inset_axes([0.10, 0.22, 0.22, 0.56])
+    cb = fig.colorbar(plt.cm.ScalarMappable(norm=norm, cmap=cmap), cax=cax,
+                      ticks=[0, S_START, G2M_START, G1_START, TWO_PI])
+    cb.ax.set_yticklabels(["0", "0.5π", "π", "1.75π", "2π"])
+    cb.ax.set_title("θ (rad)", loc="left", fontsize=14, pad=14)
+    cb.outline.set_visible(False)
+
+    sax = fig.add_subplot(gs[:, 5])
+    sax.axis("off")
+    dot_legend(sax, ["G1/G0\n1.75π to 0.5π", "S\n0.5π to π", "G2/M\nπ to 1.75π"],
+               [stage_colour[s] for s in STAGES], "stage bin")
 
     fig.savefig(args.out, bbox_inches="tight", facecolor="white")
     print("wrote", args.out)

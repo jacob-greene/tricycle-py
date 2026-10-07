@@ -12,14 +12,25 @@ cells. The reference works for human data as well.
 The port follows `tricycle` 1.12.0 function by function, and reproduces its
 output to floating-point precision.
 
-![Cell type and cell cycle position on two human datasets, and Python against R](docs/readme_figure.png)
+![Cell type, cell cycle position, stage bins, the tricycle embedding, and Python against R, on two human datasets](docs/readme_figure.png)
 
-*Two human multiome RNA datasets. Top: bone marrow, 8,627 cells. Bottom:
-CD34+ hematopoietic stem and progenitor cells (HSPC), 6,881 cells. Left: UMAP
-by cell type. Middle: UMAP by the cell cycle position from this package, drawn
-with tricycle's cyclic colour scale, so 0 and 2π share a colour. Right: Python
-position against R `tricycle` position for every cell. Circular r is the
-Jammalamadaka-SenGupta circular correlation coefficient.*
+*Two human multiome RNA datasets. Top row: bone marrow, 8,627 cells. Bottom
+row: CD34+ hematopoietic stem and progenitor cells (HSPC), 6,881 cells. Each
+column has one legend for both rows.*
+
+| Column | What it shows |
+|---|---|
+| 1 | UMAP by cell type. Colours are the palette stored with the bone marrow object; the HSPC row uses the same colours, so one legend is true for both rows. |
+| 2 | UMAP by cell cycle position θ from this package, on tricycle's cyclic colour scale (0 and 2π share a colour). |
+| 3 | UMAP by stage bin of θ. |
+| 4 | The tricycle embedding by stage bin. θ is the angle of each cell about the origin: θ = 0 is the positive embedding 1 axis, and θ increases counter-clockwise. Dashed rays mark the bin edges. |
+| 5 | Python θ against R `tricycle` θ for every cell, with dashed lines at the bin edges. Both axes run from 0 to 2π. Circular r is the Jammalamadaka-SenGupta circular correlation coefficient. |
+
+*Stage bins follow the tricycle vignette (Zheng et al. 2022, Genome Biology
+23:41): 0.5π is about the start of S, π the start of G2/M, and 1.75π to
+0.25π is G1/G0. The bins here cover the whole circle: G1/G0 is 1.75π to 0.5π
+through 0, S is 0.5π to π, and G2/M is π to 1.75π. The bins are a guide; θ
+itself is continuous.*
 
 ## Install
 
