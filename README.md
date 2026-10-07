@@ -19,8 +19,9 @@ cells. Bottom row: CD34+ hematopoietic stem and progenitor cells (HSPC), 6,881
 cells. Each column has one legend for both rows.*
 
 Most hematopoietic stem cells (HSC) are quiescent (Pietras et al., *J Cell
-Biol* 195:709, 2011). The positions here are consistent with that. Most HSC
-fall in the G1/G0 bin. Far fewer of the progenitors that come next (HMP,
+Biol* 195:709, 2011). In mouse bone marrow, most HSC are in G0 or G1
+(Passegué et al., *J Exp Med* 202:1599, 2005). The positions here are
+consistent with that. Most HSC fall in the G1/G0 bin. Far fewer of the progenitors that come next (HMP,
 hematopoietic multipotent progenitors) do. The G1/G0 bin cannot separate G0
 from G1, so this is a consistency check, not a measurement of quiescence.
 
