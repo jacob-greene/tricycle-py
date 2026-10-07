@@ -2,8 +2,12 @@ cff-version: 1.2.0
 title: "tricycle-py: a Python port of the R package tricycle"
 message: >-
   This software is a port. Cite the original tricycle paper, listed under
-  references, in any work that uses it.
+  references, in any work that uses it. Cite this port as well if you wish.
 type: software
+authors:
+  - family-names: Greene
+    given-names: Jacob
+version: 0.1.0
 license: GPL-3.0-only
 repository-code: "https://github.com/jacob-greene/tricycle-py"
 abstract: >-

@@ -20,6 +20,7 @@ Biology 16:e9946 (2020) as well if you use :func:`estimate_schwabe_stage`.
 
 from __future__ import annotations
 
+from . import datasets
 from .diagnostics import TotalUmiDiagnosis, diagnose_total_umi
 from .loess import (
     LoessFit,
@@ -59,6 +60,7 @@ TRICYCLE_R_VERSION = "1.12.0"
 __all__ = [
     "__version__",
     "TRICYCLE_R_VERSION",
+    "datasets",
     # core
     "project_cycle_space",
     "estimate_cycle_position",

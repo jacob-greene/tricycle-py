@@ -25,7 +25,7 @@ reproduce the R numbers.
 ## Copyright
 
     tricycle-py, a Python port of the R package tricycle.
-    Copyright (C) 2026 the tricycle-py authors.
+    Copyright (C) 2026 Jacob Greene.
 
     This program is free software: you can redistribute it and/or modify it
     under the terms of the GNU General Public License as published by the Free
@@ -70,6 +70,7 @@ the output of running it.
 |---|---|---|
 | `neuroRef.tsv` | `tricycle` R package data object `neuroRef` | GPL-3 |
 | `RevelioGeneList.tsv` | `tricycle` R package data object `RevelioGeneList` | GPL-3 |
+| `neurosphere_example.npz` | `tricycle` R package data object `neurosphere_example`, with the `tricyclePosition` R computes on it | GPL-3 |
 | `ensembl2symbol_human.tsv.gz` | `org.Hs.eg.db` 3.19.1, `mapIds(..., "SYMBOL", "ENSEMBL", multiVals = "first")` | Artistic-2.0 |
 | `ensembl2symbol_mouse.tsv.gz` | `org.Mm.eg.db` 3.19.1, same query | Artistic-2.0 |
 | `go_cc_{human,mouse}_{symbol,ensembl}.txt` | GO:0007049 membership via `org.*.eg.db` `GOALL` | Gene Ontology content is CC BY 4.0 |
@@ -78,8 +79,9 @@ Artistic-2.0 and CC BY 4.0 are both compatible with redistribution inside a
 GPL-3 work. Attribution for all three is this file.
 
 `PROVENANCE.tsv` in the same directory records the exact package versions the
-extraction ran against. `equivalence/extract_reference_data.R` is the script
-that produced every file.
+extraction ran against. `equivalence/extract_reference_data.R` produced every file except
+`neurosphere_example.npz`, which `equivalence/extract_example_data.R` and
+`equivalence/build_example_data.py` produced.
 
 ## Relationship to the upstream project
 
