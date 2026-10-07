@@ -18,14 +18,19 @@ output to floating-point precision.
 cells. Bottom row: CD34+ hematopoietic stem and progenitor cells (HSPC), 6,881
 cells. Each column has one legend for both rows.*
 
-Hematopoietic stem cells (HSC) are mostly quiescent. Most HSC fall in the
-G1/G0 bin, far more than in the progenitors that come next (HMP, hematopoietic
-multipotent progenitors), which are mostly in S:
+Most hematopoietic stem cells (HSC) are quiescent (Pietras et al., *J Cell
+Biol* 195:709, 2011). The positions here are consistent with that. Most HSC
+fall in the G1/G0 bin. Far fewer of the progenitors that come next (HMP,
+hematopoietic multipotent progenitors) do. The G1/G0 bin cannot separate G0
+from G1, so this is a consistency check, not a measurement of quiescence.
 
-| Row | HSC cells | HSC in G1/G0 | HMP cells | HMP in G1/G0 | HMP in S |
-|---|---:|---:|---:|---:|---:|
-| Bone marrow | 95 | 75% | 121 | 31% | 65% |
-| CD34+ HSPC | 2,042 | 94% | 2,007 | 46% | 41% |
+| Row | HSC cells | HSC in G1/G0 | HMP cells | HMP in G1/G0 |
+|---|---:|---:|---:|---:|
+| Bone marrow | 95 | 75% (59%) | 121 | 31% (22%) |
+| CD34+ HSPC | 2,042 | 94% (91%) | 2,007 | 46% (39%) |
+
+The numbers in brackets use the vignette's G1/G0 edges only, without the
+0.25π to 0.5π gap described below. The contrast holds under both.
 
 | Column | What it shows |
 |---|---|
@@ -43,8 +48,8 @@ itself is continuous.*
 
 ### Data
 
-Both datasets are public. [`docs/make_readme_figure.py`](docs/make_readme_figure.py)
-downloads them, checks their md5 checksums, and rebuilds this figure:
+Both datasets are public. From a clone of this repository,
+[`docs/make_readme_figure.py`](docs/make_readme_figure.py) downloads them, checks their md5 checksums, and rebuilds this figure:
 
 ```bash
 python docs/make_readme_figure.py --out docs/readme_figure.png
