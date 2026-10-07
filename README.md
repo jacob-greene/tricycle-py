@@ -14,6 +14,8 @@ output to floating-point precision.
 
 ![Validation figure: cell type, binned cell cycle stage, the tricycle embedding, continuous cell cycle position, and Python against R, on two human datasets](docs/readme_figure.png)
 
+[Vector version (PDF)](docs/readme_figure.pdf)
+
 *Two human multiome RNA datasets. Top row: T cell depleted bone marrow, 8,627
 cells. Bottom row: CD34+ hematopoietic stem and progenitor cells (HSPC), 6,881
 cells. Each column has one legend for both rows.*
@@ -35,11 +37,11 @@ The numbers in brackets use the vignette's G1/G0 edges only, without the
 
 | Column | What it shows |
 |---|---|
-| 1 | UMAP by cell type, with four cell types labelled at their median position. Colours are the palette stored with the bone marrow object; the HSPC row uses the same colours, so one legend is true for both rows. The HSPC object stores its own, different palette. |
-| 2 | UMAP by stage bin of the cell cycle position θ from this package. |
-| 3 | The tricycle embedding by stage bin. θ is the angle of each cell about the origin: θ = 0 is the positive embedding 1 axis, and θ increases counter-clockwise. Dashed rays mark the bin edges. |
-| 4 | UMAP by θ itself, on tricycle's cyclic colour scale. The colour wheel is the legend: the colour at each angle is the colour of that θ, and 0 and 2π share a colour. |
-| 5 | Python θ against R `tricycle` θ for every cell, with dashed lines at the bin edges. Both axes run from 0 to 2π. Points are coloured by θ, as in column 4. Circular r is the Jammalamadaka-SenGupta circular correlation coefficient. |
+| 1 (panel A) | UMAP by cell type, with four cell types labelled at their median position. Colours are the palette stored with the bone marrow object; the HSPC row uses the same colours, so one legend is true for both rows. The HSPC object stores its own, different palette. |
+| 2 (panel B) | UMAP by stage bin of the cell cycle position θ from this package. |
+| 3 (panel C, left) | The tricycle embedding by stage bin. θ is the angle of each cell about the origin: θ = 0 is the positive embedding 1 axis, and θ increases counter-clockwise. Dashed rays mark the bin edges. |
+| 4 (panel C, right) | UMAP by θ itself, on tricycle's cyclic colour scale. The colour wheel is the legend: the colour at each angle is the colour of that θ, and 0 and 2π share a colour. |
+| 5 (panel D) | Python θ against R `tricycle` θ for every cell, with dashed lines at the bin edges. Both axes run from 0 to 2π. Points are coloured by θ, as in column 4. Circular r is the Jammalamadaka-SenGupta circular correlation coefficient. |
 
 *Stage bin edges come from the tricycle vignette (Zheng et al. 2022, Genome Biology
 23:41): 0.5π is about the start of S, π the start of G2/M, and 1.75π to
@@ -50,11 +52,15 @@ itself is continuous.*
 ### Data
 
 Both datasets are public. From a clone of this repository,
-[`docs/make_readme_figure.py`](docs/make_readme_figure.py) downloads them, checks their md5 checksums, and rebuilds this figure:
+[`docs/make_readme_figure.py`](docs/make_readme_figure.py) downloads them, checks their md5 checksums, and rebuilds the data and panels of this figure:
 
 ```bash
-python docs/make_readme_figure.py --out docs/readme_figure.png
+python docs/make_readme_figure.py --out readme_figure_rebuilt.png
 ```
+
+The published layout was adjusted by hand: panel letters, titles, row labels
+and spacing. So the script's output has the same data and panels, but it is
+not pixel-identical to the figure above.
 
 It needs the `[figure]` extra. Column 5 also needs R with the Bioconductor
 package `tricycle`; without R, the script draws the first four columns.

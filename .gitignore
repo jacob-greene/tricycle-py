@@ -22,3 +22,6 @@ htmlcov/
 .vscode/
 *.swp
 .ipynb_checkpoints/
+
+# Output of docs/make_readme_figure.py; the published figure is docs/readme_figure.*
+readme_figure_rebuilt.png

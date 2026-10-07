@@ -28,14 +28,15 @@ Each input is an ``.h5ad`` that holds:
 
 The Python position is computed here, from ``X``, by this package. Nothing is
 read from a previous Python run. ``docs/make_readme_figure.py`` downloads the
-public data and calls this script; use it to rebuild the README figure.
+public data and calls this script; use it to rebuild the README figure. The
+published figure is this output with the layout adjusted by hand.
 
 Usage::
 
     python docs/readme_figure.py \\
         --row "Human bone marrow" bm.h5ad --annotate HSC,Mono,Ery,NaiveB \\
         --row "Human CD34+ HSPC" cd34.h5ad --annotate HSC,Mono,Ery,CLP \\
-        --out docs/readme_figure.png
+        --out readme_figure_rebuilt.png
 
 One legend must be true for every row, so one cell type palette is used for
 all rows: the palette of the row named by ``--palette-row`` (the first row by

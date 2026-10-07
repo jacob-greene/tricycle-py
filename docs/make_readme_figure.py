@@ -1,6 +1,9 @@
 """Download the public data and build the README figure from it.
 
-This is the whole path from public files to ``docs/readme_figure.png``:
+This is the whole path from public files to the figure's data and panels.
+The published ``docs/readme_figure.pdf`` and ``docs/readme_figure.png`` are
+this output with the layout adjusted by hand, so the script does not
+overwrite them by default:
 
 1. Download two ``.h5ad`` files (see ``SOURCES``) into a cache directory and
    check each against its md5 checksum. A cached file whose checksum matches
@@ -17,7 +20,7 @@ This is the whole path from public files to ``docs/readme_figure.png``:
 Usage::
 
     uv pip install "tricycle-py[figure] @ git+https://github.com/jacob-greene/tricycle-py"
-    python docs/make_readme_figure.py --out docs/readme_figure.png
+    python docs/make_readme_figure.py --out readme_figure_rebuilt.png
 
 Options: ``--cache DIR`` (default ``~/.cache/tricycle-py-figure``), ``--no-r``
 to skip R, ``--rscript PATH`` to name the ``Rscript`` to use. The download is
@@ -138,7 +141,7 @@ def r_position(a: ad.AnnData, workdir: Path, rscript: str) -> np.ndarray:
 
 def main(argv=None) -> dict:
     p = argparse.ArgumentParser(description=__doc__.splitlines()[0])
-    p.add_argument("--out", default=str(HERE / "readme_figure.png"))
+    p.add_argument("--out", default="readme_figure_rebuilt.png")
     p.add_argument("--cache", default=str(Path.home() / ".cache" / "tricycle-py-figure"))
     p.add_argument("--no-r", action="store_true", help="leave out column 5")
     p.add_argument("--rscript", default="Rscript")
