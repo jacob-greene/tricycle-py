@@ -103,11 +103,13 @@ scverse ecosystem, reaches the same answer as float64: both agree with R at
 
 ## The README figure
 
-[`readme_figure.py`](readme_figure.py) draws the README figure. It computes the
-Python position itself and reads the R position from the input file. Inputs
-are two human multiome RNA datasets, each log-normalised, with gene symbols as
-the gene index. R `tricycle` 1.12.0 and this package each read the same
-normalised matrix.
+[`make_readme_figure.py`](make_readme_figure.py) downloads two public human
+multiome RNA datasets, checks their md5 checksums, and runs R `tricycle`
+through [`readme_figure_r.R`](readme_figure_r.R). Then
+[`readme_figure.py`](readme_figure.py) computes the Python position and draws
+the figure. Each dataset is log-normalised, with gene symbols as the gene
+index. R `tricycle` 1.12.0 and this package each read the same normalised
+matrix. The README lists the data sources and their licences.
 
 | Dataset | Cells | Reference genes matched | Circular r | Maximum circular difference |
 |---|---:|---:|---|---|
@@ -119,7 +121,7 @@ implementation, `astropy.stats.circcorrcoef` and `pingouin.circ_corrcc` agree
 to all 15 printed digits. Shuffling the R positions across cells drops r to
 -0.005 and -0.003, so the statistic is able to move.
 
-The stage bins of columns 3 to 5 are G1/G0 (1.75π to 0.5π, through 0), S
+The stage bins of columns 2, 3 and 5 are G1/G0 (1.75π to 0.5π, through 0), S
 (0.5π to π) and G2/M (π to 1.75π). The Python and R positions put every cell
 in the same bin.
 

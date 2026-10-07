@@ -28,6 +28,7 @@ dependencies = [
 
 [project.optional-dependencies]
 plot = ["matplotlib>=3.6"]
+figure = ["matplotlib>=3.6"]
 test = ["pytest>=7.0", "matplotlib>=3.6"]
 
 [project.urls]

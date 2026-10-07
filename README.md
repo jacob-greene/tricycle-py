@@ -12,25 +12,51 @@ cells. The reference works for human data as well.
 The port follows `tricycle` 1.12.0 function by function, and reproduces its
 output to floating-point precision.
 
-![Cell type, cell cycle position, stage bins, the tricycle embedding, and Python against R, on two human datasets](docs/readme_figure.png)
+![Validation figure: cell type, binned cell cycle stage, the tricycle embedding, continuous cell cycle position, and Python against R, on two human datasets](docs/readme_figure.png)
 
-*Two human multiome RNA datasets. Top row: bone marrow, 8,627 cells. Bottom
-row: CD34+ hematopoietic stem and progenitor cells (HSPC), 6,881 cells. Each
-column has one legend for both rows.*
+*Two human multiome RNA datasets. Top row: T cell depleted bone marrow, 8,627
+cells. Bottom row: CD34+ hematopoietic stem and progenitor cells (HSPC), 6,881
+cells. Each column has one legend for both rows.*
+
+Hematopoietic stem cells (HSC) are mostly quiescent. Most HSC fall in the
+G1/G0 bin, far more than in the progenitors that come next (HMP, hematopoietic
+multipotent progenitors), which are mostly in S:
+
+| Row | HSC cells | HSC in G1/G0 | HMP cells | HMP in G1/G0 | HMP in S |
+|---|---:|---:|---:|---:|---:|
+| Bone marrow | 95 | 75% | 121 | 31% | 65% |
+| CD34+ HSPC | 2,042 | 94% | 2,007 | 46% | 41% |
 
 | Column | What it shows |
 |---|---|
-| 1 | UMAP by cell type. Colours are the palette stored with the bone marrow object; the HSPC row uses the same colours, so one legend is true for both rows. The HSPC object stores its own, different palette. |
-| 2 | UMAP by cell cycle position θ from this package, on tricycle's cyclic colour scale (0 and 2π share a colour). |
-| 3 | UMAP by stage bin of θ. |
-| 4 | The tricycle embedding by stage bin. θ is the angle of each cell about the origin: θ = 0 is the positive embedding 1 axis, and θ increases counter-clockwise. Dashed rays mark the bin edges. |
-| 5 | Python θ against R `tricycle` θ for every cell, with dashed lines at the bin edges. Both axes run from 0 to 2π. Points are coloured by θ, as in column 2. Circular r is the Jammalamadaka-SenGupta circular correlation coefficient. |
+| 1 | UMAP by cell type, with four cell types labelled at their median position. Colours are the palette stored with the bone marrow object; the HSPC row uses the same colours, so one legend is true for both rows. The HSPC object stores its own, different palette. |
+| 2 | UMAP by stage bin of the cell cycle position θ from this package. |
+| 3 | The tricycle embedding by stage bin. θ is the angle of each cell about the origin: θ = 0 is the positive embedding 1 axis, and θ increases counter-clockwise. Dashed rays mark the bin edges. |
+| 4 | UMAP by θ itself, on tricycle's cyclic colour scale. The colour wheel is the legend: the colour at each angle is the colour of that θ, and 0 and 2π share a colour. |
+| 5 | Python θ against R `tricycle` θ for every cell, with dashed lines at the bin edges. Both axes run from 0 to 2π. Points are coloured by θ, as in column 4. Circular r is the Jammalamadaka-SenGupta circular correlation coefficient. |
 
 *Stage bin edges come from the tricycle vignette (Zheng et al. 2022, Genome Biology
 23:41): 0.5π is about the start of S, π the start of G2/M, and 1.75π to
 0.25π is G1/G0. The vignette leaves 0.25π to 0.5π unassigned; here it goes
 to G1/G0, so the bins cover the whole circle: G1/G0 is 1.75π to 0.5π through 0, S is 0.5π to π, and G2/M is π to 1.75π. The bins are a guide; θ
 itself is continuous.*
+
+### Data
+
+Both datasets are public. [`docs/make_readme_figure.py`](docs/make_readme_figure.py)
+downloads them, checks their md5 checksums, and rebuilds this figure:
+
+```bash
+python docs/make_readme_figure.py --out docs/readme_figure.png
+```
+
+It needs the `[figure]` extra. Column 5 also needs R with the Bioconductor
+package `tricycle`; without R, the script draws the first four columns.
+
+| Row | File | Source | Licence |
+|---|---|---|---|
+| CD34+ HSPC | `cd34_multiome_rna.h5ad` | Persad S, Choo Z-N, Dien C, Masilionis I, Chaligne R, Nawy T, Brown CC, Pe'er I, Setty M, Pe'er D (2022). SEACells: Inference of transcriptional and epigenomic cellular states from single-cell genomics data (processed data). Zenodo. [doi:10.5281/zenodo.6383269](https://doi.org/10.5281/zenodo.6383269) | CC BY 4.0 |
+| Bone marrow | `preprocessed_t-cell-depleted-bm-rna.h5ad` | The tutorial data of [Mellon](https://github.com/settylab/Mellon) (Otto DJ *et al.*, *Nature Methods* 2024). Its expression is that of `bm_multiome_rna.h5ad` in the same Zenodo record, with 1,188 more B lineage cells, a UMAP and finer cell type labels. | CC BY 4.0 for the Zenodo record; no licence is stated for the tutorial file |
 
 ## Install
 
