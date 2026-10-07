@@ -20,16 +20,16 @@ column has one legend for both rows.*
 
 | Column | What it shows |
 |---|---|
-| 1 | UMAP by cell type. Colours are the palette stored with the bone marrow object; the HSPC row uses the same colours, so one legend is true for both rows. |
+| 1 | UMAP by cell type. Colours are the palette stored with the bone marrow object; the HSPC row uses the same colours, so one legend is true for both rows. The HSPC object stores its own, different palette. |
 | 2 | UMAP by cell cycle position θ from this package, on tricycle's cyclic colour scale (0 and 2π share a colour). |
 | 3 | UMAP by stage bin of θ. |
 | 4 | The tricycle embedding by stage bin. θ is the angle of each cell about the origin: θ = 0 is the positive embedding 1 axis, and θ increases counter-clockwise. Dashed rays mark the bin edges. |
-| 5 | Python θ against R `tricycle` θ for every cell, with dashed lines at the bin edges. Both axes run from 0 to 2π. Circular r is the Jammalamadaka-SenGupta circular correlation coefficient. |
+| 5 | Python θ against R `tricycle` θ for every cell, with dashed lines at the bin edges. Both axes run from 0 to 2π. Points are coloured by θ, as in column 2. Circular r is the Jammalamadaka-SenGupta circular correlation coefficient. |
 
-*Stage bins follow the tricycle vignette (Zheng et al. 2022, Genome Biology
+*Stage bin edges come from the tricycle vignette (Zheng et al. 2022, Genome Biology
 23:41): 0.5π is about the start of S, π the start of G2/M, and 1.75π to
-0.25π is G1/G0. The bins here cover the whole circle: G1/G0 is 1.75π to 0.5π
-through 0, S is 0.5π to π, and G2/M is π to 1.75π. The bins are a guide; θ
+0.25π is G1/G0. The vignette leaves 0.25π to 0.5π unassigned; here it goes
+to G1/G0, so the bins cover the whole circle: G1/G0 is 1.75π to 0.5π through 0, S is 0.5π to π, and G2/M is π to 1.75π. The bins are a guide; θ
 itself is continuous.*
 
 ## Install
