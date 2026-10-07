@@ -12,6 +12,8 @@ cells. The reference works for human data as well.
 The port follows `tricycle` 1.12.0 function by function, and reproduces its
 output to floating-point precision.
 
+Validation was run on two hematopoiesis single-cell RNA-seq datasets. The expectation is that most hematopoietic stem cells (HSCs) are quiescent (in G1/0) and hematopoietic multipotent progenitor (HMPs) enter the cell cycle preceding differentiation (Pietras et al., J Cell Biol 195:709, 2011). 
+
 ![Validation figure: cell type, binned cell cycle stage, the tricycle embedding, continuous cell cycle position, and Python against R, on two human datasets](docs/readme_figure.png)
 
 | Row | HSC cells | HSC in G1/G0 | HMP cells | HMP in G1/G0 |
