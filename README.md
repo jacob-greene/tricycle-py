@@ -14,61 +14,19 @@ output to floating-point precision.
 
 ![Validation figure: cell type, binned cell cycle stage, the tricycle embedding, continuous cell cycle position, and Python against R, on two human datasets](docs/readme_figure.png)
 
-[Vector version (PDF)](docs/readme_figure.pdf)
-
-*Two human multiome RNA datasets. Top row: T cell depleted bone marrow, 8,627
-cells. Bottom row: CD34+ hematopoietic stem and progenitor cells (HSPC), 6,881
-cells. Each column has one legend for both rows.*
-
-Most hematopoietic stem cells (HSC) are quiescent (Pietras et al., *J Cell
-Biol* 195:709, 2011). In mouse bone marrow, most HSC are in G0 or G1
-(Passegué et al., *J Exp Med* 202:1599, 2005). The positions here are
-consistent with that. Most HSC fall in the G1/G0 bin. Far fewer of the progenitors that come next (HMP,
-hematopoietic multipotent progenitors) do. The G1/G0 bin cannot separate G0
-from G1, so this is a consistency check, not a measurement of quiescence.
-
 | Row | HSC cells | HSC in G1/G0 | HMP cells | HMP in G1/G0 |
 |---|---:|---:|---:|---:|
 | Bone marrow | 95 | 75% (59%) | 121 | 31% (22%) |
 | CD34+ HSPC | 2,042 | 94% (91%) | 2,007 | 46% (39%) |
 
-The numbers in brackets use the vignette's G1/G0 edges only, without the
-0.25π to 0.5π gap described below. The contrast holds under both.
-
-| Column | What it shows |
-|---|---|
-| 1 (panel A) | UMAP by cell type, with four cell types labelled at their median position. Colours are the palette stored with the bone marrow object; the HSPC row uses the same colours, so one legend is true for both rows. The HSPC object stores its own, different palette. |
-| 2 (panel B) | UMAP by stage bin of the cell cycle position θ from this package. |
-| 3 (panel C, left) | The tricycle embedding by stage bin. θ is the angle of each cell about the origin: θ = 0 is the positive embedding 1 axis, and θ increases counter-clockwise. Dashed rays mark the bin edges. |
-| 4 (panel C, right) | UMAP by θ itself, on tricycle's cyclic colour scale. The colour wheel is the legend: the colour at each angle is the colour of that θ, and 0 and 2π share a colour. |
-| 5 (panel D) | Python θ against R `tricycle` θ for every cell, with dashed lines at the bin edges. Both axes run from 0 to 2π. Points are coloured by θ, as in column 4. Circular r is the Jammalamadaka-SenGupta circular correlation coefficient. |
+(A) cell type annotation on the UMAP embedding for bone marrow mononuclear cells (T-cell depleted; top) and CD34+ enriched bone marrow (bottom). (B) cell cycle stage annotation from tricycle-py based on binned theta values (C) cell cycle stage annotation on the tricycle embedding from which theta is derived (left). Theta position is also shown the UMAP embedding for each dataset (right). (D)
+tricycle-py θ against R `tricycle` θ for every cell, with dashed lines at the bin edges. Circular r is the Jammalamadaka-SenGupta circular correlation coefficient.
 
 *Stage bin edges come from the tricycle vignette (Zheng et al. 2022, Genome Biology
 23:41): 0.5π is about the start of S, π the start of G2/M, and 1.75π to
 0.25π is G1/G0. The vignette leaves 0.25π to 0.5π unassigned; here it goes
 to G1/G0, so the bins cover the whole circle: G1/G0 is 1.75π to 0.5π through 0, S is 0.5π to π, and G2/M is π to 1.75π. The bins are a guide; θ
 itself is continuous.*
-
-### Data
-
-Both datasets are public. From a clone of this repository,
-[`docs/make_readme_figure.py`](docs/make_readme_figure.py) downloads them, checks their md5 checksums, and rebuilds the data and panels of this figure:
-
-```bash
-python docs/make_readme_figure.py --out readme_figure_rebuilt.png
-```
-
-The published layout was adjusted by hand: panel letters, titles, row labels
-and spacing. So the script's output has the same data and panels, but it is
-not pixel-identical to the figure above.
-
-It needs the `[figure]` extra. Column 5 also needs R with the Bioconductor
-package `tricycle`; without R, the script draws the first four columns.
-
-| Row | File | Source | Licence |
-|---|---|---|---|
-| CD34+ HSPC | `cd34_multiome_rna.h5ad` | Persad S, Choo Z-N, Dien C, Masilionis I, Chaligne R, Nawy T, Brown CC, Pe'er I, Setty M, Pe'er D (2022). SEACells: Inference of transcriptional and epigenomic cellular states from single-cell genomics data (processed data). Zenodo. [doi:10.5281/zenodo.6383269](https://doi.org/10.5281/zenodo.6383269) | CC BY 4.0 |
-| Bone marrow | `preprocessed_t-cell-depleted-bm-rna.h5ad` | The tutorial data of [Mellon](https://github.com/settylab/Mellon) (Otto DJ *et al.*, *Nature Methods* 2024). Its expression is that of `bm_multiome_rna.h5ad` in the same Zenodo record, with 1,188 more B lineage cells, a UMAP and finer cell type labels. | CC BY 4.0 for the Zenodo record; no licence is stated for the tutorial file |
 
 ## Install
 
@@ -110,8 +68,6 @@ the last line compares the two.
 tp.estimate_cycle_position(adata, species="human", gname_type="SYMBOL")
 ```
 
-Two things must be right, and neither raises an error when wrong:
-
 | Requirement | Why |
 |---|---|
 | `adata.X` holds log-normalised expression, not counts | The projection is a weighted sum of centred log-expression. Raw counts give wrong angles. Use `layer=` to read another layer. |
@@ -144,6 +100,20 @@ A deliberate change of 1e-9 to one reference weight makes the comparison
 fail, so it is able to detect a real difference. The full tables, the known
 differences from R, and how to reproduce them are in
 [`docs/equivalence.md`](docs/equivalence.md).
+
+### Validation Data
+
+Both datasets are public. From a clone of this repository,
+[`docs/make_readme_figure.py`](docs/make_readme_figure.py) downloads them, checks their md5 checksums, and rebuilds the data and panels of this figure:
+
+```bash
+python docs/make_readme_figure.py --out readme_figure_rebuilt.png
+```
+
+| Row | File | Source | Licence |
+|---|---|---|---|
+| CD34+ HSPC | `cd34_multiome_rna.h5ad` | Persad S, Choo Z-N, Dien C, Masilionis I, Chaligne R, Nawy T, Brown CC, Pe'er I, Setty M, Pe'er D (2022). SEACells: Inference of transcriptional and epigenomic cellular states from single-cell genomics data (processed data). Zenodo. [doi:10.5281/zenodo.6383269](https://doi.org/10.5281/zenodo.6383269) | CC BY 4.0 |
+| Bone marrow | `preprocessed_t-cell-depleted-bm-rna.h5ad` | The tutorial data of [Mellon](https://github.com/settylab/Mellon) (Otto DJ *et al.*, *Nature Methods* 2024). Its expression is that of `bm_multiome_rna.h5ad` in the same Zenodo record, with 1,188 more B lineage cells, a UMAP and finer cell type labels. | CC BY 4.0 for the Zenodo record; no licence is stated for the tutorial file |
 
 ## Speed and memory
 
