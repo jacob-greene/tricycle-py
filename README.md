@@ -32,6 +32,10 @@ Python 3.10 or later. Add `[plot]` to the URL target for the plotting helpers,
 which need `matplotlib`:
 `pip install "tricycle-py[plot] @ git+https://github.com/jacob-greene/tricycle-py"`.
 
+On an older Linux system, the newest `h5py` (a dependency of `anndata`) may
+have no binary wheel and fail to build. Add `--only-binary h5py` to the
+install command so that an older `h5py` wheel is used.
+
 ## Quick start
 
 This runs as written. It uses the 400-cell example that ships with the package.
