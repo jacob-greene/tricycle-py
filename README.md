@@ -6,7 +6,7 @@ Cell cycle position from single-cell RNA-seq, in Python, on `AnnData`.
 [`tricycle`](https://github.com/hansenlab/tricycle) (Zheng et al., *Genome
 Biology* 2022). It assigns each cell a continuous cell cycle position: an angle (theta)
 from 0 to 2π. The angle is derived by projecting log-normalised expression into a reference PCA space based on expression of 500 cell cycle genes in a mouse neurosphere
-single-cell RNA dataset. As shown below and in the paper, the mouse reference works for human data as well.
+single-cell RNA-seq dataset. As shown below and in the paper, the mouse reference works for human data as well.
 
 The port follows `tricycle` 1.12.0 function by function, and reproduces its
 output to floating-point precision.
