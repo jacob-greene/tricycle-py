@@ -18,7 +18,7 @@ Validation was run on two hematopoiesis single-cell RNA-seq datasets. The expect
 | Row | HSC cells | HSC in G1/G0 | HMP cells | HMP in G1/G0 |
 |---|---:|---:|---:|---:|
 | Bone marrow | 95 | 75% (59%) | 121 | 31% (22%) |
-| CD34+ HSPC | 2,042 | 94% (91%) | 2,007 | 46% (39%) |
+| CD34+ | 2,042 | 94% (91%) | 2,007 | 46% (39%) |
 
 (A) cell type annotation on the UMAP embedding for bone marrow mononuclear cells (T-cell depleted; top) and CD34+ enriched bone marrow (bottom). (B) cell cycle stage annotation from tricycle-py based on binned theta values (C) cell cycle stage annotation on the tricycle embedding from which theta is derived (left). Theta position is also shown on the UMAP embedding for each dataset (right). (D)
 tricycle-py θ against R `tricycle` θ for every cell, with dashed lines at the bin edges. Circular r is the Jammalamadaka-SenGupta circular correlation coefficient.
