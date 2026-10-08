@@ -4,10 +4,9 @@ Cell cycle position from single-cell RNA-seq, in Python, on `AnnData`.
 
 `tricycle-py` is a Python port of the R/Bioconductor package
 [`tricycle`](https://github.com/hansenlab/tricycle) (Zheng et al., *Genome
-Biology* 2022). It gives each cell a continuous cell cycle position: an angle
-from 0 to 2π. It gets the angle by projecting log-normalised expression onto
-a fixed reference embedding that `tricycle` learned from mouse neurosphere
-cells. The reference works for human data as well.
+Biology* 2022). It assigns each cell a continuous cell cycle position: an angle (theta)
+from 0 to 2π. The angle is derived by projecting log-normalised expression into a reference PCA space based on expression of 500 cell cycle genes in a mouse neurosphere
+single-cell RNA dataset. As shown below and in the paper, the mouse reference works for human data as well.
 
 The port follows `tricycle` 1.12.0 function by function, and reproduces its
 output to floating-point precision.
@@ -21,7 +20,7 @@ Validation was run on two hematopoiesis single-cell RNA-seq datasets. The expect
 | Bone marrow | 95 | 75% (59%) | 121 | 31% (22%) |
 | CD34+ HSPC | 2,042 | 94% (91%) | 2,007 | 46% (39%) |
 
-(A) cell type annotation on the UMAP embedding for bone marrow mononuclear cells (T-cell depleted; top) and CD34+ enriched bone marrow (bottom). (B) cell cycle stage annotation from tricycle-py based on binned theta values (C) cell cycle stage annotation on the tricycle embedding from which theta is derived (left). Theta position is also shown the UMAP embedding for each dataset (right). (D)
+(A) cell type annotation on the UMAP embedding for bone marrow mononuclear cells (T-cell depleted; top) and CD34+ enriched bone marrow (bottom). (B) cell cycle stage annotation from tricycle-py based on binned theta values (C) cell cycle stage annotation on the tricycle embedding from which theta is derived (left). Theta position is also shown on the UMAP embedding for each dataset (right). (D)
 tricycle-py θ against R `tricycle` θ for every cell, with dashed lines at the bin edges. Circular r is the Jammalamadaka-SenGupta circular correlation coefficient.
 
 *Stage bin edges come from the tricycle vignette (Zheng et al. 2022, Genome Biology
