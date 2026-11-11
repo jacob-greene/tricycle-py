@@ -32,11 +32,9 @@ itself is continuous.*
 ## Install
 
 ```bash
-pip install git+https://github.com/jacob-greene/tricycle-py
+uv pip install git+https://github.com/jacob-greene/tricycle-py
 ```
-
-`uv pip install git+https://github.com/jacob-greene/tricycle-py` works too.
-Python 3.10 or later. Add `[plot]` to the URL target for the plotting helpers,
+requires Python 3.10 or later. Add `[plot]` to the URL target for the plotting helpers,
 which need `matplotlib`:
 `pip install "tricycle-py[plot] @ git+https://github.com/jacob-greene/tricycle-py"`.
 
@@ -45,8 +43,6 @@ have no binary wheel and fail to build. Add `--only-binary h5py` to the
 install command so that an older `h5py` wheel is used.
 
 ## Quick start
-
-This runs as written. It uses the 400-cell example that ships with the package.
 
 ```python
 import numpy as np
@@ -57,11 +53,9 @@ tp.estimate_cycle_position(adata)           # writes adata.obs["tricyclePosition
 
 theta = adata.obs["tricyclePosition"]       # radians, 0 to 2*pi
 diff = np.angle(np.exp(1j * (theta - adata.obs["tricyclePosition_R"])))
+#compare to R
 print(f"max |Python - R| = {np.abs(diff).max():.1e} rad")
 ```
-
-The example carries the position R `tricycle` computes on the same cells, so
-the last line compares the two.
 
 ### Your own data
 
