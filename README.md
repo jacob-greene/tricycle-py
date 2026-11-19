@@ -146,6 +146,3 @@ Biology* 16:e9946 (2020) as well. To cite this port, use
 GPL-3. `tricycle` is GPL-3, and this port is a derivative work, so it carries
 the same licence. See [`ATTRIBUTION.md`](ATTRIBUTION.md) for credit to the
 original authors and the licences of the shipped data.
-
-This is an independent port. The `tricycle` authors do not endorse or support
-it. Report problems with the port here.
